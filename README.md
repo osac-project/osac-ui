@@ -6,7 +6,7 @@ A modern web-based console for managing virtual machine infrastructure through t
 
 ## Overview
 
-OSAC UI provides a user-friendly interface for managing virtual machines, clusters, templates, and infrastructure resources. It features enterprise-grade authentication via Keycloak OIDC, role-based access control, and multi-tenant organization support.
+OSAC UI provides a user-friendly interface for managing virtual and machines, clusters, templates, and infrastructure resources. It features enterprise-grade authentication via Keycloak OIDC, role-based access control, and multi-tenant organization support.
 
 ## Features
 
