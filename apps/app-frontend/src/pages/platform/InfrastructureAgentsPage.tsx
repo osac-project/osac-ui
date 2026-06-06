@@ -31,7 +31,7 @@ import {
 import { ActionsColumn } from '@patternfly/react-table'
 import { PlusCircleIcon } from '@patternfly/react-icons'
 import type { Agent, AgentState } from '@osac/api-contracts'
-import { OcTable, OcLink } from '@osac/ui-components'
+import { OcLink, OcTable } from '@osac/ui-components'
 import type { OcTableColumn } from '@osac/ui-components'
 import { useAgents, useDeprovisionAgent, useProvisionAgent } from '../../hooks/useAgents'
 import { PageHeader } from '../../components/layout'

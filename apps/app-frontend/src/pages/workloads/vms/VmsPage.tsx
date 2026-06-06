@@ -9,7 +9,6 @@ import {
   Bullseye,
   Button,
   Content,
-  Divider,
   Flex,
   FlexItem,
   PageSection,
@@ -47,9 +46,6 @@ import { useQueryClient } from '@tanstack/react-query'
 
 type StatusFilter = 'all' | VmPowerState
 
-const pageDividerCss = css`
-  margin-bottom: var(--pf-t--global--spacer--md);
-`
 
 const toolbarFlexCss = css`
   margin-bottom: var(--pf-t--global--spacer--md);

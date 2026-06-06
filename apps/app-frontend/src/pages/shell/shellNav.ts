@@ -1,6 +1,5 @@
 import type { ComponentType } from 'react'
 import {
-  ThIcon,
   ServerIcon,
   CubesIcon,
   CloudIcon,

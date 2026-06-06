@@ -23,8 +23,8 @@ import {
   PageSection,
   Spinner,
   Tab,
-  Tabs,
   TabTitleText,
+  Tabs,
 } from '@patternfly/react-core'
 import { ArrowCircleUpIcon } from '@patternfly/react-icons/dist/esm/icons/arrow-circle-up-icon'
 import { DownloadIcon } from '@patternfly/react-icons/dist/esm/icons/download-icon'
@@ -39,8 +39,8 @@ import { ClusterStatusLabel } from '../../../components/clusters/ClusterStatusLa
 import { UpgradeClusterModal } from '../../../components/clusters/UpgradeClusterModal'
 import { PageHeader } from '../../../components/layout'
 import {
-  ClusterOverviewTab,
   ClusterNetworkingTab,
+  ClusterOverviewTab,
   ClusterStorageTab,
 } from '../../../components/clusters/tabs'
 

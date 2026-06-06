@@ -8,7 +8,7 @@ interface ClusterStatusLabelProps {
   state: ClusterState
 }
 
-const STATE_CONFIG: Record<ClusterState, { color: 'blue' | 'green' | 'red' | 'grey' | 'orange' | 'purple' | 'cyan' | 'gold'; text: string; spinning?: boolean }> = {
+const STATE_CONFIG: Record<ClusterState, { color: 'blue' | 'green' | 'red' | 'grey' | 'orange' | 'purple' | 'teal' | 'yellow'; text: string; spinning?: boolean }> = {
   CLUSTER_STATE_PROGRESSING: { color: 'blue', text: 'Provisioning', spinning: true },
   CLUSTER_STATE_READY: { color: 'green', text: 'Ready' },
   CLUSTER_STATE_FAILED: { color: 'red', text: 'Failed' },

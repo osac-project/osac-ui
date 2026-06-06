@@ -11,7 +11,6 @@ import {
   Bullseye,
   Button,
   Content,
-  Divider,
   Flex,
   FlexItem,
   FormSelect,
@@ -63,9 +62,6 @@ const emptyMessageCss = css`
   color: var(--pf-t--global--text--color--subtle);
 `
 
-const pageDividerCss = css`
-  margin-bottom: var(--pf-t--global--spacer--md);
-`
 
 const apiUrlMonoCss = css`
   font-family: monospace;

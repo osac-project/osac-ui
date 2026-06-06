@@ -65,7 +65,7 @@ export function OcTable<T>({
   getRowKey,
   onRowClick,
   isRowDisabled,
-  variant = 'compact' as const,
+  variant = 'compact',
   defaultPageSize,
 }: OcTableProps<T>) {
   const paginated = defaultPageSize != null

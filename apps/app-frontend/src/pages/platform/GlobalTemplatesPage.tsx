@@ -78,7 +78,7 @@ export function GlobalTemplatesPage() {
       {/* KPI row */}
       <div className={kpiGridCss}>
         <OcCard label="Catalog items" value={String(items.length)} />
-        <OcCard label="Published" value={String(published)} accentColor="var(--pf-t--global--color--status--success--default)" />
+        <OcCard label="Published" value={String(published)} tone="success" />
         <OcCard label="Backing templates" value={String(BACKING_TEMPLATES.length)} hint="Ansible roles" />
         <OcCard label="Avg presets / item" value={String(avgPresets)} />
       </div>

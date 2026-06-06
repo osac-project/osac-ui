@@ -154,10 +154,6 @@ const tabContentCss = css`
   padding-top: 1rem;
 `
 
-const cardFlushCss = css`
-  padding: 0;
-  overflow: hidden;
-`
 
 const boundCodeCss = css`
   font-size: 12px;
