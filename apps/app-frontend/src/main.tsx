@@ -15,10 +15,26 @@ const queryClient = new QueryClient({
   },
 })
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <App />
-    </QueryClientProvider>
-  </React.StrictMode>,
-)
+async function prepare(): Promise<void> {
+  if (import.meta.env.VITE_MSW === 'true') {
+    const { worker } = await import('./mocks/browser')
+    await worker.start({
+      onUnhandledRequest(request, print) {
+        // Navigation requests (HTML documents) are handled by Vite's dev server,
+        // not MSW — silently ignore them to avoid "Failed to fetch" errors.
+        if (request.headers.get('accept')?.includes('text/html')) return
+        print.warning()
+      },
+    })
+  }
+}
+
+prepare().then(() => {
+  ReactDOM.createRoot(document.getElementById('root')!).render(
+    <React.StrictMode>
+      <QueryClientProvider client={queryClient}>
+        <App />
+      </QueryClientProvider>
+    </React.StrictMode>,
+  )
+})

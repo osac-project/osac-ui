@@ -1,86 +1,94 @@
-import type { DemoShellRole } from '@osac/api-contracts'
+import type { ComponentType } from 'react'
+import {
+  ThIcon,
+  ServerIcon,
+  CubesIcon,
+  CloudIcon,
+  DatabaseIcon,
+  ListIcon,
+  NetworkIcon,
+  CogIcon,
+  OutlinedClockIcon,
+} from '@patternfly/react-icons'
+import type { OsacRole } from '@osac/api-contracts'
 
-export type NavRow =
-  | { kind: 'link'; id: string; label: string; path: string }
-  | {
-      kind: 'expand'
-      label: string
-      groupId: string
-      children: { id: string; label: string; path: string }[]
-    }
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
 
-const TENANT_USER_NAV: NavRow[] = [
-  { kind: 'link', id: 'dashboard', label: 'Dashboard', path: '/dashboard' },
-  { kind: 'link', id: 'compute-vms', label: 'My VMs', path: '/vms' },
-  { kind: 'link', id: 'catalog', label: 'Templates', path: '/templates' },
+export interface NavItem {
+  id: string
+  label: string
+  path: string
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  icon: ComponentType<any>
+  /** Roles that can see this item. Undefined = visible to all roles. */
+  roles?: OsacRole[]
+}
+
+export interface NavSection {
+  /** Rendered as a NavGroup title. Omit for an untitled top section. */
+  groupLabel?: string
+  items: NavItem[]
+}
+
+// ---------------------------------------------------------------------------
+// Master nav list — single source of truth for all roles.
+// Each item declares which roles can see it; navRowsForRole filters at
+// call time so items always appear in the same canonical position.
+// ---------------------------------------------------------------------------
+
+const ALL_NAV: NavSection[] = [
+  {
+    groupLabel: 'Workloads',
+    items: [
+      // { id: 'workloads-dashboard',   label: 'Dashboard',        path: '/dashboard', icon: ThIcon,       roles: ['tenantUser','tenantAdmin', 'providerAdmin'] },
+      { id: 'vms-list', label: 'Virtual Machines',  path: '/vms',       icon: ServerIcon,   roles: ['tenantUser','tenantAdmin', 'providerAdmin'] },
+      { id: 'catalog',     label: 'Template Catalog',         path: '/templates', icon: CubesIcon,    roles: ['tenantUser','tenantAdmin', 'providerAdmin'] },
+      { id: 'clusters',    label: 'Clusters',          path: '/clusters',  icon: CloudIcon,    roles: ['tenantUser','tenantAdmin', 'providerAdmin'] },
+    ],
+  },
+  {
+    groupLabel: 'Administration',
+    items: [
+      { id: 'cluster-offerings', label: 'Cluster offerings',  path: '/cluster-offerings', icon: ListIcon,      roles: ['tenantAdmin','providerAdmin'] },
+      { id: 'networks',   label: 'Networks',    path: '/networks',   icon: NetworkIcon,  roles: ['tenantAdmin','providerAdmin'] },
+      { id: 'provider-net-classes', label: 'Network classes', path: '/provider/network-classes', icon: NetworkIcon, roles: ['providerAdmin'] },
+    ],
+  },
+  
+  {
+    groupLabel: 'Infrastructure',
+    items: [
+      { id: 'admin-public-ips', label: 'Public IPs',  path: '/admin/public-ips', icon: NetworkIcon,  roles: ['tenantAdmin', 'providerAdmin'] },
+      { id: 'admin-storage',    label: 'Storage',     path: '/admin/storage',    icon: DatabaseIcon, roles: ['tenantAdmin', 'providerAdmin'] },
+    ],
+  },
+  {
+    groupLabel: 'Platform',
+    items: [
+      { id: 'platform-storage-tiers', label: 'Storage Tiers',         path: '/storage-tiers', icon: DatabaseIcon, roles: ['providerAdmin'] },
+      { id: 'platform-agents',        label: 'Agents', path: '/agents',        icon: CogIcon,      roles: ['providerAdmin'] },
+      { id: 'platform-templates',     label: 'Global Templates',      path: '/global-templates',     icon: CubesIcon,    roles: ['providerAdmin'] },
+    ],
+  },
+  {
+    groupLabel: 'Account',
+    items: [
+      { id: 'activities', label: 'Recent Activity', path: '/activities', icon: OutlinedClockIcon, roles: ['tenantUser'] },
+    ],
+  },
 ]
 
-const TENANT_ADMIN_NAV: NavRow[] = [
-  { kind: 'link', id: 'admin-dashboard', label: 'Dashboard', path: '/admin/dashboard' },
-  {
-    kind: 'expand',
-    label: 'Management',
-    groupId: 'nav-admin-mgmt',
-    children: [
-      { id: 'admin-users', label: 'Users', path: '/admin/users' },
-      { id: 'admin-quota', label: 'Quota control', path: '/admin/quota' },
-      { id: 'admin-templates', label: 'Template catalog', path: '/admin/templates' },
-    ],
-  },
-  {
-    kind: 'expand',
-    label: 'Infrastructure',
-    groupId: 'nav-admin-infra',
-    children: [
-      { id: 'admin-networks', label: 'Networks', path: '/admin/networks' },
-      { id: 'admin-storage', label: 'Storage', path: '/admin/storage' },
-    ],
-  },
-  {
-    kind: 'expand',
-    label: 'Organization',
-    groupId: 'nav-admin-org',
-    children: [
-      { id: 'admin-org-settings', label: 'Organization settings', path: '/admin/org-settings' },
-      { id: 'admin-org-security', label: 'Security & Compliance', path: '/admin/security' },
-    ],
-  },
-]
+// ---------------------------------------------------------------------------
+// Exports
+// ---------------------------------------------------------------------------
 
-const PROVIDER_ADMIN_NAV: NavRow[] = [
-  { kind: 'link', id: 'provider-dashboard', label: 'Dashboard', path: '/provider/dashboard' },
-  {
-    kind: 'expand',
-    label: 'Management',
-    groupId: 'nav-provider-mgmt',
-    children: [
-      { id: 'provider-orgs', label: 'Tenant organizations', path: '/provider/organizations' },
-      { id: 'provider-allocation', label: 'Resource allocation', path: '/provider/allocation' },
-      { id: 'provider-templates', label: 'Global templates', path: '/provider/templates' },
-    ],
-  },
-  {
-    kind: 'expand',
-    label: 'System',
-    groupId: 'nav-provider-system',
-    children: [
-      { id: 'provider-infra', label: 'Infrastructure', path: '/provider/infrastructure' },
-      { id: 'provider-security', label: 'Security & Compliance', path: '/provider/security' },
-      { id: 'provider-settings', label: 'Platform settings', path: '/provider/settings' },
-    ],
-  },
-]
-
-export const DEFAULT_EXPANDED_GROUP_IDS = [
-  'nav-admin-mgmt',
-  'nav-admin-infra',
-  'nav-admin-org',
-  'nav-provider-mgmt',
-  'nav-provider-system',
-]
-
-export function navRowsForRole(role: DemoShellRole): NavRow[] {
-  if (role === 'providerAdmin') return PROVIDER_ADMIN_NAV
-  if (role === 'tenantAdmin') return TENANT_ADMIN_NAV
-  return TENANT_USER_NAV
+export function navRowsForRole(role: OsacRole): NavSection[] {
+  return ALL_NAV
+    .map((section) => ({
+      ...section,
+      items: section.items.filter((item) => !item.roles || item.roles.includes(role)),
+    }))
+    .filter((section) => section.items.length > 0)
 }

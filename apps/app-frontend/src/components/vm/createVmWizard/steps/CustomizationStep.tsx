@@ -1,3 +1,4 @@
+import { css, cx } from '@emotion/css'
 import {
   Content,
   Form,
@@ -15,7 +16,8 @@ import {
   Title,
 } from '@patternfly/react-core'
 import { useLayoutEffect, useMemo, useState } from 'react'
-import { useComputeInstanceTemplates } from '../../../../api/hooks'
+import { useComputeInstanceTemplates } from '../../../../hooks/hooks'
+import { useAllSubnets, useSecurityGroups, useVirtualNetworks } from '../../../../hooks/useNetworking'
 import {
   TEMPLATE_BOOT_DISK_MAX_GIB,
   TEMPLATE_BOOT_DISK_MIN_GIB,
@@ -30,6 +32,19 @@ import {
   parseTemplateMemoryGibInput,
 } from '../constants'
 import type { UpdateFn, WizardState } from '../types'
+
+const customizationIntroCss = css`
+  margin-top: var(--pf-t--global--spacer--sm);
+  max-width: 720px;
+`
+
+const customizationTabsCss = css`
+  margin-top: var(--pf-t--global--spacer--md);
+`
+
+const customizationTabPanelCss = css`
+  padding-top: var(--pf-t--global--spacer--md);
+`
 
 const RUN_STRATEGY_OPTIONS = [
   { value: 'Always', label: 'Always' },
@@ -46,6 +61,9 @@ type CustomizationTabKey = 'overview' | 'storage' | 'network' | 'ssh' | 'advance
 export function CustomizationStep({ state, update }: { state: WizardState; update: UpdateFn }) {
   const [activeTab, setActiveTab] = useState<CustomizationTabKey>('overview')
   const { data: templates = [] } = useComputeInstanceTemplates()
+  const { data: allSubnets } = useAllSubnets()
+  const { data: securityGroups } = useSecurityGroups()
+  const { data: virtualNetworks } = useVirtualNetworks()
 
   const selectedTemplate = useMemo(
     () => templates.find((t) => t.id === state.selectedTemplateId) ?? null,
@@ -121,8 +139,7 @@ export function CustomizationStep({ state, update }: { state: WizardState; updat
         </Title>
         <Content
           component="p"
-          className="pf-v6-u-color-text-subtle"
-          style={{ marginTop: 'var(--pf-t--global--spacer--sm)', maxWidth: 720 }}
+          className={cx('pf-v6-u-color-text-subtle', customizationIntroCss)}
         >
           Adjust compute, storage, networking, and access for this virtual machine.
         </Content>
@@ -146,10 +163,10 @@ export function CustomizationStep({ state, update }: { state: WizardState; updat
             aria-label="Virtual machine customization"
             activeKey={activeTab}
             onSelect={(_e, k) => setActiveTab(k as CustomizationTabKey)}
-            style={{ marginTop: 'var(--pf-t--global--spacer--md)' }}
+            className={customizationTabsCss}
           >
             <Tab key="overview" eventKey="overview" title={<TabTitleText>Overview</TabTitleText>}>
-              <Stack hasGutter style={{ paddingTop: 'var(--pf-t--global--spacer--md)' }}>
+              <Stack hasGutter className={customizationTabPanelCss}>
                 <Form>
                   <FormGroup label="vCPU count" fieldId="template-cores" isRequired>
                     <TextInput
@@ -195,7 +212,7 @@ export function CustomizationStep({ state, update }: { state: WizardState; updat
               </Stack>
             </Tab>
             <Tab key="storage" eventKey="storage" title={<TabTitleText>Storage</TabTitleText>}>
-              <Stack hasGutter style={{ paddingTop: 'var(--pf-t--global--spacer--md)' }}>
+              <Stack hasGutter className={customizationTabPanelCss}>
                 <Form>
                   <FormGroup
                     label="Boot disk size (GiB)"
@@ -242,34 +259,60 @@ export function CustomizationStep({ state, update }: { state: WizardState; updat
               </Stack>
             </Tab>
             <Tab key="network" eventKey="network" title={<TabTitleText>Network</TabTitleText>}>
-              <Stack hasGutter style={{ paddingTop: 'var(--pf-t--global--spacer--md)' }}>
+              <Stack hasGutter className={customizationTabPanelCss}>
                 <Form>
+                  <FormGroup label="Virtual Network" fieldId="template-virtual-network">
+                    <FormSelect
+                      id="template-virtual-network"
+                      value={state.templateVirtualNetworkId ?? ''}
+                      onChange={(_e, v) => {
+                        update('templateVirtualNetworkId', v)
+                        update('templateSubnetId', '')
+                      }}
+                      aria-label="Select virtual network"
+                    >
+                      <FormSelectOption value="" label="Default (no preference)" />
+                      {(virtualNetworks ?? []).map((vn) => (
+                        <FormSelectOption key={vn.id} value={vn.id} label={vn.metadata.name} />
+                      ))}
+                    </FormSelect>
+                    <FormHelperText>Optional.</FormHelperText>
+                  </FormGroup>
                   <FormGroup label="Subnet" fieldId="template-subnet">
-                    <TextInput
+                    <FormSelect
                       id="template-subnet"
                       value={state.templateSubnetId}
                       onChange={(_e, v) => update('templateSubnetId', v)}
-                      placeholder="e.g. 550e8400-e29b-41d4-a716-446655440000"
-                    />
-                    <FormHelperText>Optional.</FormHelperText>
+                      aria-label="Select subnet"
+                    >
+                      <FormSelectOption value="" label="Default (no preference)" />
+                      {(allSubnets ?? [])
+                        .filter((s) => !state.templateVirtualNetworkId || s.spec.virtualNetwork === state.templateVirtualNetworkId)
+                        .map((s) => (
+                          <FormSelectOption key={s.id} value={s.id} label={s.metadata.name} />
+                        ))}
+                    </FormSelect>
+                    <FormHelperText>Optional. Filtered by selected virtual network.</FormHelperText>
                   </FormGroup>
-                  <FormGroup
-                    label="Security groups"
-                    fieldId="template-security-groups"
-                    labelHelp={<Content component="p">Comma-separated identifiers.</Content>}
-                  >
-                    <TextInput
+                  <FormGroup label="Security groups" fieldId="template-security-groups">
+                    <FormSelect
                       id="template-security-groups"
                       value={state.templateSecurityGroupsRaw}
                       onChange={(_e, v) => update('templateSecurityGroupsRaw', v)}
-                      placeholder="group-1, group-2"
-                    />
+                      aria-label="Select security group"
+                    >
+                      <FormSelectOption value="" label="None (use defaults)" />
+                      {(securityGroups ?? []).map((sg) => (
+                        <FormSelectOption key={sg.id} value={sg.id} label={sg.metadata.name} />
+                      ))}
+                    </FormSelect>
+                    <FormHelperText>Optional. Select one security group.</FormHelperText>
                   </FormGroup>
                 </Form>
               </Stack>
             </Tab>
             <Tab key="ssh" eventKey="ssh" title={<TabTitleText>SSH</TabTitleText>}>
-              <Stack hasGutter style={{ paddingTop: 'var(--pf-t--global--spacer--md)' }}>
+              <Stack hasGutter className={customizationTabPanelCss}>
                 <Form>
                   <FormGroup label="SSH public key" fieldId="template-ssh-key">
                     <TextArea
@@ -290,7 +333,7 @@ export function CustomizationStep({ state, update }: { state: WizardState; updat
               eventKey="advanced"
               title={<TabTitleText>Image &amp; user data</TabTitleText>}
             >
-              <Stack hasGutter style={{ paddingTop: 'var(--pf-t--global--spacer--md)' }}>
+              <Stack hasGutter className={customizationTabPanelCss}>
                 <Form>
                   <FormGroup label="Image source type" fieldId="template-image-source-type">
                     <FormSelect
