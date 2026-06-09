@@ -28,12 +28,12 @@ import { PowerOffIcon } from '@patternfly/react-icons/dist/esm/icons/power-off-i
 import { RedoIcon } from '@patternfly/react-icons/dist/esm/icons/redo-icon'
 import { TrashIcon } from '@patternfly/react-icons/dist/esm/icons/trash-icon'
 import { css } from '@emotion/css'
-import { OcKpiHeader, VmStatusLabel } from '@osac/ui-components'
+import { KpiHeader, VmStatusLabel } from '@osac/ui-components'
 import type { ComputeInstance } from '@osac/api-contracts'
 import { resolveVmOsForUi } from '@osac/api-contracts'
 import { useComputeInstances, useDeleteVm, usePatchVm } from '../../../hooks/hooks'
 import { useVmPowerActionDisplay } from '../../../hooks/useVmPowerActionDisplay'
-import { PageHeader } from '../../../components/layout'
+import { PageHeader } from '@osac/ui-components'
 import { VmDeleteConfirmModal } from '../../../components/vm/VmDeleteConfirmModal'
 import {
   VmActivityTab,
@@ -209,7 +209,7 @@ export function VmDetailPage() {
 
         {/* KPI bar */}
         <StackItem>
-          <OcKpiHeader
+          <KpiHeader
             items={[
               {
                 label: 'Power state',

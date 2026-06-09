@@ -2,8 +2,8 @@ import { css } from '@emotion/css'
 import { EmptyState, EmptyStateBody, Label } from '@patternfly/react-core'
 import type { ComputeInstance } from '@osac/api-contracts'
 import { formatVmStorageGiBLine } from '@osac/api-contracts'
-import { OcTable } from '@osac/ui-components'
-import type { OcTableColumn } from '@osac/ui-components'
+import { ObjectsTable } from '@osac/ui-components'
+import type { ObjectsTableColumn } from '@osac/ui-components'
 
 interface Props {
   vm: ComputeInstance
@@ -24,7 +24,7 @@ const tabPaddingCss = css`
   padding-top: var(--pf-t--global--spacer--md);
 `
 
-const DISK_COLUMNS: OcTableColumn<DiskRow>[] = [
+const DISK_COLUMNS: ObjectsTableColumn<DiskRow>[] = [
   { label: 'Disk', dataLabel: 'Disk', render: (r) => r.disk },
   { label: 'Bus', dataLabel: 'Bus', render: (r) => r.bus },
   {
@@ -77,7 +77,7 @@ export function VmStorageTab({ vm }: Props) {
           <EmptyStateBody>No disk information available.</EmptyStateBody>
         </EmptyState>
       ) : (
-        <OcTable
+        <ObjectsTable
           ariaLabel="Storage volumes"
           columns={DISK_COLUMNS}
           rows={rows}

@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { Card, CardBody } from '@patternfly/react-core'
+import { Card as PfCard, CardBody as PfCardBody } from '@patternfly/react-core'
 import { css, cx } from '@emotion/css'
 
 // ---------------------------------------------------------------------------
@@ -17,7 +17,7 @@ const bodyInnerCss = css`
   gap: 6px;
 `
 
-const toneCss: Record<OcCardTone, string> = {
+const toneCss: Record<StatCardTone, string> = {
   default: '',
   success: css`
     box-shadow: -3px 0 0 0 var(--pf-t--global--color--status--success--default) !important;
@@ -61,9 +61,9 @@ const hintCss = css`
 // Types
 // ---------------------------------------------------------------------------
 
-export type OcCardTone = 'default' | 'success' | 'warning' | 'danger' | 'muted'
+export type StatCardTone = 'default' | 'success' | 'warning' | 'danger' | 'muted'
 
-export interface OcCardProps {
+export interface StatCardProps {
   /** Short descriptive label rendered above the value (displayed uppercase). */
   label: string
   /** Primary content — string or any React node (e.g. status badge, icon). */
@@ -71,7 +71,7 @@ export interface OcCardProps {
   /** Optional secondary hint line below the value. */
   hint?: ReactNode
   /** Colour tone for the left accent bar. Defaults to `"default"` (blue). */
-  tone?: OcCardTone
+  tone?: StatCardTone
   /** Additional CSS class names merged onto the card root. */
   className?: string
 }
@@ -80,16 +80,16 @@ export interface OcCardProps {
 // Component
 // ---------------------------------------------------------------------------
 
-export function OcCard({ label, value, hint, tone = 'default', className }: OcCardProps) {
+export function StatCard({ label, value, hint, tone = 'default', className }: StatCardProps) {
   return (
-    <Card isFullHeight className={cx(cardCss, toneCss[tone], className)}>
-      <CardBody>
+    <PfCard isFullHeight className={cx(cardCss, toneCss[tone], className)}>
+      <PfCardBody>
         <div className={bodyInnerCss}>
           <div className={labelCss}>{label}</div>
           <div className={valueCss}>{value}</div>
           {hint && <div className={hintCss}>{hint}</div>}
         </div>
-      </CardBody>
-    </Card>
+      </PfCardBody>
+    </PfCard>
   )
 }

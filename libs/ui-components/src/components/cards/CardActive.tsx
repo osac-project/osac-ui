@@ -1,5 +1,5 @@
 /**
- * OcCardActive — generic clickable card component for OSAC UIs.
+ * CardActive — generic clickable card component for OSAC UIs.
  *
  * Built on PatternFly's Card primitives (Card / CardHeader / CardTitle /
  * CardBody / CardFooter) using the isClickable + selectableActions pattern
@@ -11,7 +11,7 @@
  * link-blue subtitle / CTA text, PF token-aware dark mode.
  *
  * Usage:
- *   <OcCardActive
+ *   <CardActive
  *     tone="northstar"
  *     badge="Tenant Organization"
  *     title="Northstar Bank"
@@ -32,11 +32,11 @@ import type { ReactNode } from 'react'
 // ---------------------------------------------------------------------------
 
 /** Tone variant — drives the 3 px coloured top border. */
-export type OcCardActiveTone = 'provider' | 'northstar' | 'bluestone'
+export type CardActiveTone = 'provider' | 'northstar' | 'bluestone'
 
-export interface OcCardActiveProps {
+export interface CardActiveProps {
   /** Accent tone — maps to a coloured 3 px top border. */
-  tone?: OcCardActiveTone
+  tone?: CardActiveTone
   /** Small all-caps label at the top-left (e.g. "Platform Operator"). */
   badge?: string
   /** Optional icon rendered at the top-right of the header row. */
@@ -61,13 +61,13 @@ export interface OcCardActiveProps {
 // Styles
 // ---------------------------------------------------------------------------
 
-const TONE_BORDERS: Record<OcCardActiveTone, string> = {
+const TONE_BORDERS: Record<CardActiveTone, string> = {
   provider: '#6753c2',
   northstar: '#003f87',
   bluestone: '#1f7a4d',
 }
 
-function cardCss(tone?: OcCardActiveTone) {
+function cardCss(tone?: CardActiveTone) {
   const toneAccent = tone ? `border-top: 3px solid ${TONE_BORDERS[tone]};` : ''
 
   return css`
@@ -198,7 +198,7 @@ const descCss = css`
 // Component
 // ---------------------------------------------------------------------------
 
-export function OcCardActive({
+export function CardActive({
   tone,
   badge,
   icon,
@@ -209,7 +209,7 @@ export function OcCardActive({
   onClick,
   className,
   'aria-label': ariaLabel,
-}: OcCardActiveProps) {
+}: CardActiveProps) {
   const uid = useId()
   const titleId = `oc-card-active-title-${uid}`
 

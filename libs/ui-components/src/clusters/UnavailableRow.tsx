@@ -6,16 +6,6 @@ const unavailableRowCss = css`
   color: var(--pf-t--global--text--color--subtle);
 `
 
-export function formatDate(ts?: string): string {
-  if (!ts) return '—'
-  try {
-    const d = new Date(ts)
-    return `${d.toLocaleDateString()} ${d.toLocaleTimeString()}`
-  } catch {
-    return ts
-  }
-}
-
 export function UnavailableRow({ label }: { label: string }) {
   return (
     <Flex

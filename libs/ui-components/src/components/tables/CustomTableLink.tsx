@@ -1,10 +1,6 @@
 import { css } from '@emotion/css'
 import { Button } from '@patternfly/react-core'
 
-// ---------------------------------------------------------------------------
-// Styles
-// ---------------------------------------------------------------------------
-
 const linkCss = css`
   font-weight: var(--pf-t--global--font--weight--body--bold);
   text-decoration-style: dashed;
@@ -15,22 +11,14 @@ const linkCss = css`
   }
 `
 
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-export interface OcLinkProps {
+export interface CustomTableLinkProps {
   children: string
   onClick: () => void
   isDisabled?: boolean
   title?: string
 }
 
-// ---------------------------------------------------------------------------
-// Component
-// ---------------------------------------------------------------------------
-
-export function OcLink({ children, onClick, isDisabled, title }: OcLinkProps) {
+export function CustomTableLink({ children, onClick, isDisabled, title }: CustomTableLinkProps) {
   return (
     <Button
       variant="link"

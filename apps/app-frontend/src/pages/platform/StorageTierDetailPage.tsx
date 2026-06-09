@@ -32,9 +32,9 @@ import {
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table'
 import { EditIcon } from '@patternfly/react-icons/dist/esm/icons/edit-icon'
 import { TrashIcon } from '@patternfly/react-icons/dist/esm/icons/trash-icon'
-import { OcCard } from '@osac/ui-components'
+import { StatCard } from '@osac/ui-components'
 import { useStorageTiers } from '../../hooks/useAgents'
-import { PageHeader } from '../../components/layout'
+import { PageHeader } from '@osac/ui-components'
 import { MOCK_CONSUMERS, tierMeta } from './StorageTiersPage'
 
 const tabContentCss = css`
@@ -193,21 +193,21 @@ export function StorageTierDetailPage() {
 
       {/* KPI row */}
       <div className={kpiRowCss}>
-        <OcCard
+        <StatCard
           label="Status"
           value={tier.available ? 'Available' : 'Disabled'}
           tone={tier.available ? 'success' : 'danger'}
         />
-        <OcCard label="IOPS" value={meta.iops} hint="per view" />
-        <OcCard label="Throughput" value={`${meta.throughputGbps} GB/s`} hint="sustained" />
-        <OcCard label="Latency" value={meta.latency} hint="p99" />
-        <OcCard
+        <StatCard label="IOPS" value={meta.iops} hint="per view" />
+        <StatCard label="Throughput" value={`${meta.throughputGbps} GB/s`} hint="sustained" />
+        <StatCard label="Latency" value={meta.latency} hint="p99" />
+        <StatCard
           label="Capacity"
           value={`${meta.usedTib} / ${meta.capacityTib} TiB`}
           hint={`${usedPct}% used`}
           tone={usedPct > 80 ? 'warning' : 'default'}
         />
-        <OcCard
+        <StatCard
           label="Consumers"
           value={totalPvcs}
           hint={`${consumers.length} tenant${consumers.length !== 1 ? 's' : ''}`}

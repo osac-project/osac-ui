@@ -1,7 +1,7 @@
 import { css } from '@emotion/css'
 import { Card, CardBody, Content, Stack, StackItem, Title } from '@patternfly/react-core'
 
-interface DashboardMetricCardProps {
+interface MetricCardProps {
   label: string
   value: number
 }
@@ -18,7 +18,7 @@ const labelCss = css`
   color: var(--pf-t--global--text--color--subtle);
 `
 
-export function DashboardMetricCard({ label, value }: DashboardMetricCardProps) {
+export function MetricCard({ label, value }: MetricCardProps) {
   return (
     <Card isCompact className={cardCss}>
       <CardBody>

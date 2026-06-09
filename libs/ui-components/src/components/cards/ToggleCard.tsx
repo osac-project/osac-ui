@@ -59,26 +59,26 @@ type LabelColor =
   | 'orangered'
   | 'yellow'
 
-export interface OcToggleCardLabel {
+export interface ToggleCardLabel {
   text: string
   color?: LabelColor
 }
 
-export interface OcToggleCardChip {
+export interface ToggleCardChip {
   key: string
   text: string
   color?: LabelColor
 }
 
-export interface OcToggleCardProps {
+export interface ToggleCardProps {
   /** Title text — displayed in blue. */
   title: ReactNode
   /** Status / metadata labels shown beside the title. */
-  labels?: OcToggleCardLabel[]
+  labels?: ToggleCardLabel[]
   /** Optional description text below the title. */
   description?: ReactNode
   /** Small chip labels (e.g. version numbers) rendered below the description. */
-  chips?: OcToggleCardChip[]
+  chips?: ToggleCardChip[]
   /** Whether the item is currently active / enabled. Controls toggle state and card opacity. */
   isActive: boolean
   /** Called with the new boolean value when the toggle changes. */
@@ -99,7 +99,7 @@ export interface OcToggleCardProps {
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
-export function OcToggleCard({
+export function ToggleCard({
   title,
   labels = [],
   description,
@@ -112,7 +112,7 @@ export function OcToggleCard({
   onAction,
   switchId,
   extra,
-}: OcToggleCardProps) {
+}: ToggleCardProps) {
   return (
     <Card className={cardCss} data-inactive={!isActive}>
       <CardHeader

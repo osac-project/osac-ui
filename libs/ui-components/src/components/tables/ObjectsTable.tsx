@@ -4,10 +4,6 @@ import { css } from '@emotion/css'
 import { Pagination } from '@patternfly/react-core'
 import { Table, TableVariant, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table'
 
-// ---------------------------------------------------------------------------
-// Styles
-// ---------------------------------------------------------------------------
-
 const wrapCss = css`
   border: 1px solid var(--pf-t--global--border--color--default);
   border-radius: var(--pf-t--global--border--radius--medium);
@@ -19,11 +15,7 @@ const paginationCss = css`
   border-top: 1px solid var(--pf-t--global--border--color--default);
 `
 
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-export interface OcTableColumn<T> {
+export interface ObjectsTableColumn<T> {
   /** Header label — pass `screenReaderText` only for action columns (no visible header) */
   label?: string
   screenReaderText?: string
@@ -35,10 +27,10 @@ export interface OcTableColumn<T> {
   isActionCell?: boolean
 }
 
-export interface OcTableProps<T> {
+export interface ObjectsTableProps<T> {
   /** Accessible label for the table element */
   ariaLabel: string
-  columns: OcTableColumn<T>[]
+  columns: ObjectsTableColumn<T>[]
   rows: T[]
   /** Return a stable, unique key for each row */
   getRowKey: (row: T) => string
@@ -54,11 +46,7 @@ export interface OcTableProps<T> {
   defaultPageSize?: number
 }
 
-// ---------------------------------------------------------------------------
-// Component
-// ---------------------------------------------------------------------------
-
-export function OcTable<T>({
+export function ObjectsTable<T>({
   ariaLabel,
   columns,
   rows,
@@ -67,7 +55,7 @@ export function OcTable<T>({
   isRowDisabled,
   variant = 'compact',
   defaultPageSize,
-}: OcTableProps<T>) {
+}: ObjectsTableProps<T>) {
   const paginated = defaultPageSize != null
 
   const [page, setPage] = useState(1)

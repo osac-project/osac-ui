@@ -30,10 +30,11 @@ export interface ActionRowProps {
   body: string
   cta: string
   tone?: 'danger'
+  disabled?: boolean
   onClick?: () => void
 }
 
-export function ActionRow({ icon, title, body, cta, tone, onClick }: ActionRowProps) {
+export function ActionRow({ icon, title, body, cta, tone, disabled, onClick }: ActionRowProps) {
   const iconCss = css`
     color: ${tone === 'danger' ? 'var(--pf-t--global--color--status--danger--default)' : 'inherit'};
   `
@@ -49,7 +50,11 @@ export function ActionRow({ icon, title, body, cta, tone, onClick }: ActionRowPr
               <div className={bodyCss}>{body}</div>
             </div>
           </div>
-          <Button variant={tone === 'danger' ? 'danger' : 'secondary'} onClick={onClick}>
+          <Button
+            variant={tone === 'danger' ? 'danger' : 'secondary'}
+            isDisabled={disabled}
+            onClick={onClick}
+          >
             {cta}
           </Button>
         </div>

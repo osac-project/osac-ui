@@ -1,6 +1,5 @@
 import { css } from '@emotion/css'
 import { Button, Card, CardBody, Flex, FlexItem, Label } from '@patternfly/react-core'
-import type { CatalogItem } from './types'
 
 const cardCss = css`
   display: flex;
@@ -32,12 +31,24 @@ const actionsFlexCss = css`
   padding-top: 4px;
 `
 
+export interface CatalogItem {
+  id: string
+  name: string
+  template: string
+  variant: string
+  cpu: number
+  ram: number
+  presets: number
+  published: boolean
+}
+
 export interface CatalogItemCardProps {
   item: CatalogItem
   onTogglePublish: (id: string, published: boolean) => void
+  onEditPresets: (id: string) => void
 }
 
-export function CatalogItemCard({ item, onTogglePublish }: CatalogItemCardProps) {
+export function CatalogItemCard({ item, onTogglePublish, onEditPresets }: CatalogItemCardProps) {
   return (
     <Card className={cardCss}>
       <CardBody className={cardBodyCss}>
@@ -73,7 +84,7 @@ export function CatalogItemCard({ item, onTogglePublish }: CatalogItemCardProps)
 
         <Flex className={actionsFlexCss} spaceItems={{ default: 'spaceItemsSm' }}>
           <FlexItem>
-            <Button variant="secondary" size="sm">
+            <Button variant="secondary" size="sm" onClick={() => onEditPresets(item.id)}>
               Edit presets
             </Button>
           </FlexItem>
