@@ -8,6 +8,8 @@ import (
 	"strings"
 
 	log "github.com/sirupsen/logrus"
+
+	"github.com/osac/proxy/config"
 )
 
 // Handler implements the BFF auth endpoints for the OIDC PKCE flow.
@@ -60,19 +62,22 @@ func (h *Handler) GetLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	issuerURL, err := h.issuerURL()
+	issuer, err := h.fetchIssuer()
 	if err != nil {
-		log.WithError(err).Error("failed to get OIDC issuer URL")
+		log.WithError(err).Error("failed to get OIDC issuer")
 		http.Error(w, "could not determine OIDC issuer", http.StatusBadGateway)
 		return
 	}
 
-	oidcCfg, err := FetchOIDCConfig(issuerURL, h.OIDCHTTPClient)
+	// Use the internal URL for discovery (in-cluster), then rewrite AuthorizationEndpoint to the
+	// external URL so the browser is redirected to the publicly accessible Keycloak.
+	oidcCfg, err := FetchOIDCConfig(issuer.InternalURL, h.OIDCHTTPClient)
 	if err != nil {
 		log.WithError(err).Error("OIDC discovery failed")
 		http.Error(w, "OIDC discovery failed", http.StatusBadGateway)
 		return
 	}
+	oidcCfg.AuthorizationEndpoint = strings.Replace(oidcCfg.AuthorizationEndpoint, issuer.InternalURL, issuer.ExternalURL, 1)
 
 	verifier, err := generateCodeVerifier()
 	if err != nil {
@@ -90,7 +95,7 @@ func (h *Handler) GetLogin(w http.ResponseWriter, r *http.Request) {
 	if err := setAuthFlowCookie(w, r, state, authFlowCookie{
 		Verifier:    verifier,
 		RedirectURI: redirectURI,
-		IssuerURL:   issuerURL,
+		IssuerURL:   issuer.InternalURL,
 	}); err != nil {
 		log.WithError(err).Error("failed to set auth flow cookie")
 		http.Error(w, "internal error", http.StatusInternalServerError)
@@ -181,14 +186,14 @@ func (h *Handler) GetLoginRefresh(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	issuerURL, err := h.issuerURL()
+	issuer, err := h.fetchIssuer()
 	if err != nil {
-		log.WithError(err).Error("failed to get OIDC issuer URL for refresh")
+		log.WithError(err).Error("failed to get OIDC issuer for refresh")
 		http.Error(w, "could not determine OIDC issuer", http.StatusBadGateway)
 		return
 	}
 
-	oidcCfg, err := FetchOIDCConfig(issuerURL, h.OIDCHTTPClient)
+	oidcCfg, err := FetchOIDCConfig(issuer.InternalURL, h.OIDCHTTPClient)
 	if err != nil {
 		log.WithError(err).Error("OIDC discovery failed during refresh")
 		http.Error(w, "OIDC discovery failed", http.StatusBadGateway)
@@ -222,14 +227,14 @@ func (h *Handler) PostLogout(w http.ResponseWriter, r *http.Request) {
 	tokenData := LookupSessionCookies(r)
 
 	if tokenData != nil {
-		issuerURL, err := h.issuerURL()
+		issuer, err := h.fetchIssuer()
 		if err != nil {
-			log.WithError(err).Error("failed to get OIDC issuer URL for logout")
+			log.WithError(err).Error("failed to get OIDC issuer for logout")
 			http.Error(w, "could not determine OIDC issuer", http.StatusBadGateway)
 			return
 		}
 
-		oidcCfg, err := FetchOIDCConfig(issuerURL, h.OIDCHTTPClient)
+		oidcCfg, err := FetchOIDCConfig(issuer.InternalURL, h.OIDCHTTPClient)
 		if err != nil {
 			log.WithError(err).Error("OIDC discovery failed during logout")
 			http.Error(w, "OIDC discovery failed", http.StatusBadGateway)
@@ -247,9 +252,19 @@ func (h *Handler) PostLogout(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
-// issuerURL returns the configured OIDC issuer URL, fetching it from capabilities if needed.
-func (h *Handler) issuerURL() (string, error) {
-	return FetchIssuerURL(h.FulfillmentAPIURL, h.FulfillmentHTTPClient)
+// fetchIssuer fetches the token issuer from the fulfillment capabilities endpoint.
+// When EXTERNAL_OIDC_URL is set, InternalURL is overridden with ExternalURL so that all
+// OIDC discovery and token calls go to the externally accessible Keycloak URL. This is
+// needed when the proxy runs outside the cluster and cannot reach the internal service URL.
+func (h *Handler) fetchIssuer() (TokenIssuer, error) {
+	issuer, err := FetchTokenIssuer(h.FulfillmentAPIURL, h.FulfillmentHTTPClient)
+	if err != nil {
+		return issuer, err
+	}
+	if config.ExternalOIDCURL {
+		issuer.InternalURL = issuer.ExternalURL
+	}
+	return issuer, nil
 }
 
 // resolveCallbackURI computes the /callback redirect URI from the SPA's redirect_base.

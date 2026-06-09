@@ -16,6 +16,12 @@ var (
 	FulfillmentTlsInsecure = getEnvVar("FULFILLMENT_TLS_INSECURE", "") == "1"
 	// OIDCClientID is the client_id registered in the IdP for this UI application.
 	OIDCClientID = getEnvVar("OIDC_CLIENT_ID", "osac-ui")
+	// OIDCTlsCaFile CA file for verifying the OIDC IdP's TLS certificate.
+	OIDCTlsCaFile = getEnvVar("OIDC_TLS_CA_FILE", "")
+	// ExternalOIDCURL forces the proxy to use the external Keycloak URL for all OIDC calls
+	// (discovery, token exchange, refresh). Set to "1" when running the proxy outside the cluster
+	// where the internal Keycloak service URL is not reachable.
+	ExternalOIDCURL = getEnvVar("EXTERNAL_OIDC_URL", "") == "1"
 	// OIDCTlsInsecure disables TLS certificate verification when contacting the OIDC IdP
 	// (discovery, token exchange, refresh). For development only.
 	OIDCTlsInsecure = getEnvVar("OIDC_TLS_INSECURE", "") == "1"

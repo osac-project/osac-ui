@@ -11,7 +11,7 @@ import (
 )
 
 // GetOIDCTlsConfig returns a TLS config for outbound OIDC requests (discovery, token exchange).
-// It respects OIDC_TLS_INSECURE for dev environments with self-signed IdP certificates.
+// It respects OIDC_TLS_CA_FILE and OIDC_TLS_INSECURE.
 func GetOIDCTlsConfig() (*tls.Config, error) {
 	tlsConfig := &tls.Config{
 		MinVersion: tls.VersionTLS13,
@@ -22,6 +22,23 @@ func GetOIDCTlsConfig() (*tls.Config, error) {
 		tlsConfig.InsecureSkipVerify = true //nolint:gosec
 		return tlsConfig, nil
 	}
+
+	caFile := config.OIDCTlsCaFile
+	if caFile == "" {
+		return tlsConfig, nil
+	}
+
+	caCert, err := os.ReadFile(caFile)
+	if err != nil {
+		return nil, err
+	}
+
+	caCertPool, err := x509.SystemCertPool()
+	if err != nil {
+		return nil, err
+	}
+	caCertPool.AppendCertsFromPEM(caCert)
+	tlsConfig.RootCAs = caCertPool
 
 	return tlsConfig, nil
 }
