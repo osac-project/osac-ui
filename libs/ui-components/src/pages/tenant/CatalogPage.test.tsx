@@ -178,7 +178,7 @@ describe('CatalogPage', () => {
       expect(screen.getByText(vmCatalogItem.title)).toBeInTheDocument();
     });
 
-    expect(screen.getByRole('heading', { name: 'Virtual machines', level: 2 })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Virtual Machines', level: 2 })).toBeInTheDocument();
     expect(screen.queryByText(clusterCatalogItem.title)).not.toBeInTheDocument();
   });
 

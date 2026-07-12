@@ -1,4 +1,4 @@
-import { MessageInitShape, create, toJson } from '@bufbuild/protobuf';
+import { type MessageInitShape } from '@bufbuild/protobuf';
 import { useMutation } from '@tanstack/react-query';
 
 import {
@@ -50,14 +50,16 @@ export type PatchBareMetalInstanceInput =
   | { id: string; action: 'start' | 'stop' }
   | { id: string; action: 'restart'; currentTrigger: bigint };
 
-const buildPatchBody = (input: PatchBareMetalInstanceInput): Record<string, unknown> => {
+const buildPatchBody = (
+  input: PatchBareMetalInstanceInput,
+): MessageInitShape<typeof BareMetalInstanceSchema> => {
   switch (input.action) {
     case 'start':
-      return { spec: { run_strategy: BareMetalInstanceRunStrategy.ALWAYS } };
+      return { spec: { runStrategy: BareMetalInstanceRunStrategy.ALWAYS } };
     case 'stop':
-      return { spec: { run_strategy: BareMetalInstanceRunStrategy.HALTED } };
+      return { spec: { runStrategy: BareMetalInstanceRunStrategy.HALTED } };
     case 'restart':
-      return { spec: { restart_trigger: String(input.currentTrigger + 1n) } };
+      return { spec: { restartTrigger: input.currentTrigger + 1n } };
   }
 };
 
@@ -70,6 +72,7 @@ export const usePatchBareMetalInstance = () => {
         pathParams: [input.id],
         method: 'PATCH',
         body: buildPatchBody(input),
+        encode: BareMetalInstanceSchema,
         decode: BareMetalInstanceSchema,
       }),
     onSuccess: () => invalidateBareMetalInstancesQueries(qc),
@@ -93,15 +96,13 @@ export const useCreateBareMetalInstance = () => {
   const apiFetch = useApiFetch();
   const qc = useApiQueryClient();
   return useMutation({
-    mutationFn: (bmi: MessageInitShape<typeof BareMetalInstanceSchema>) => {
-      const message = create(BareMetalInstanceSchema, bmi);
-      const body = toJson(BareMetalInstanceSchema, message);
-      return apiFetch<BareMetalInstance>('v1/baremetal_instances', {
+    mutationFn: (bmi: MessageInitShape<typeof BareMetalInstanceSchema>) =>
+      apiFetch<BareMetalInstance>('v1/baremetal_instances', {
         method: 'POST',
-        body,
+        body: bmi,
+        encode: BareMetalInstanceSchema,
         decode: BareMetalInstanceSchema,
-      });
-    },
+      }),
     onSuccess: () => invalidateBareMetalInstancesQueries(qc),
   });
 };

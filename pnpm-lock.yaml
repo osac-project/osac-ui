@@ -44,6 +44,9 @@ importers:
 
   apps/app-frontend:
     dependencies:
+      '@bufbuild/protobuf':
+        specifier: ^2.12.0
+        version: 2.12.0
       '@osac/types':
         specifier: workspace:*
         version: link:../../libs/types

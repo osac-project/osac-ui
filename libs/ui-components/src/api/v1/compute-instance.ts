@@ -1,8 +1,11 @@
+import { type MessageInitShape } from '@bufbuild/protobuf';
+import { timestampNow } from '@bufbuild/protobuf/wkt';
 import { useMutation } from '@tanstack/react-query';
 
 import {
   type ComputeInstance,
   ComputeInstanceSchema,
+  ComputeInstanceState,
   type ComputeInstancesListResponse,
   ComputeInstancesListResponseSchema,
 } from '@osac/types';
@@ -10,12 +13,6 @@ import {
 import { useApiFetch } from '../api-context';
 import { apiQueryKey } from '../types';
 import { useApiQuery, useApiQueryClient } from '../use-api-query';
-import {
-  type BuildComputeInstanceCreateBodyInput,
-  type ComputeInstancePowerAction,
-  buildComputeInstanceCreateBody,
-  buildComputeInstancePowerPatchBody,
-} from './compute-instance-wire';
 
 export type ListComputeInstancesParams = {
   filter?: string;
@@ -69,45 +66,19 @@ export const pollComputeInstancesUntilListed = async (
   }
 };
 
-export type ProvisionComputeInstanceResult = {
-  instance: ComputeInstance;
-  warnings: string[];
-};
-
-export type ProvisionComputeInstanceInput = {
-  vm: BuildComputeInstanceCreateBodyInput;
-  /** When true, POST body must include `spec.catalog_item`. */
-  specCatalogItemOnly?: boolean;
-  /** @deprecated Use specCatalogItemOnly for wizard create-from-catalog. */
-  specTemplateOnly?: boolean;
-};
-
 export const useProvisionComputeInstance = () => {
   const apiFetch = useApiFetch();
   const qc = useApiQueryClient();
   return useMutation({
-    mutationFn: async ({
-      vm,
-      specCatalogItemOnly,
-      specTemplateOnly,
-    }: ProvisionComputeInstanceInput): Promise<ProvisionComputeInstanceResult> => {
-      // REST Create uses response_body: "object", so the HTTP body is the ComputeInstance
-      // itself — not ComputeInstancesCreateResponse { object, warnings }.
-      const instance = await apiFetch<ComputeInstance>('v1/compute_instances', {
+    mutationFn: async (
+      vm: MessageInitShape<typeof ComputeInstanceSchema>,
+    ): Promise<ComputeInstance> => {
+      return apiFetch<ComputeInstance>('v1/compute_instances', {
         method: 'POST',
-        body: buildComputeInstanceCreateBody(vm, {
-          specCatalogItemOnly,
-          specTemplateOnly,
-        }),
+        body: vm,
+        encode: ComputeInstanceSchema,
         decode: ComputeInstanceSchema,
       });
-      if (!instance.id) {
-        throw new Error('Create response missing id');
-      }
-      return {
-        instance,
-        warnings: [],
-      };
     },
     onSuccess: async () => {
       await invalidateComputeInstancesQueries(qc);
@@ -115,22 +86,42 @@ export const useProvisionComputeInstance = () => {
   });
 };
 
-export type PatchComputeInstanceInput =
-  | { id: string; patch: Record<string, unknown> }
-  | { id: string; powerAction: ComputeInstancePowerAction };
+export type ComputeInstancePowerAction = 'start' | 'stop' | 'restart';
+
+export type PatchComputeInstanceInput = {
+  id: string;
+  powerAction: ComputeInstancePowerAction;
+};
+
+const buildPowerPatchBody = (
+  powerAction: ComputeInstancePowerAction,
+): MessageInitShape<typeof ComputeInstanceSchema> => {
+  switch (powerAction) {
+    case 'stop':
+      return {
+        spec: { runStrategy: 'Halted' },
+        status: { state: ComputeInstanceState.STOPPED },
+      };
+    case 'start':
+      return {
+        spec: { runStrategy: 'Always' },
+        status: { state: ComputeInstanceState.RUNNING },
+      };
+    case 'restart':
+      return { spec: { restartRequestedAt: timestampNow() } };
+  }
+};
 
 export const usePatchComputeInstance = () => {
   const apiFetch = useApiFetch();
   const qc = useApiQueryClient();
   return useMutation({
-    mutationFn: (input: PatchComputeInstanceInput) =>
+    mutationFn: ({ id, powerAction }: PatchComputeInstanceInput) =>
       apiFetch<ComputeInstance>('v1/compute_instances', {
-        pathParams: [input.id],
+        pathParams: [id],
         method: 'PATCH',
-        body:
-          'powerAction' in input
-            ? buildComputeInstancePowerPatchBody(input.powerAction)
-            : input.patch,
+        body: buildPowerPatchBody(powerAction),
+        encode: ComputeInstanceSchema,
         decode: ComputeInstanceSchema,
       }),
     onSuccess: () => invalidateComputeInstancesQueries(qc),
@@ -149,5 +140,3 @@ export const useDeleteComputeInstance = () => {
     onSuccess: () => invalidateComputeInstancesQueries(qc),
   });
 };
-
-export type { ComputeInstancePowerAction } from './compute-instance-wire';

@@ -2,7 +2,12 @@
  * App-level fulfillment HTTP adapter — URL construction, credentials, errors,
  * `{ object }` unwrap, and protobuf JSON decode for cluster responses.
  */
-import { decodeFulfillmentResponse } from '@osac/ui-components/api/fulfillment-decode';
+import { type MessageInitShape } from '@bufbuild/protobuf';
+
+import {
+  decodeFulfillmentResponse,
+  encodeFulfillmentBody,
+} from '@osac/ui-components/api/fulfillment-decode';
 import type { ApiFetch, ApiFetchOptions, ApiRoute } from '@osac/ui-components/api/types';
 import { formatHttpApiErrorMessage } from '@osac/ui-components/utils/error';
 import { UnauthorizedError } from '@osac/ui-components/utils/unauthorizedError';
@@ -13,7 +18,7 @@ export const fulfillmentFetch: ApiFetch = async <T = unknown>(
   route: ApiRoute,
   options: ApiFetchOptions = {},
 ): Promise<T> => {
-  const { pathParams, queryParams, method = 'GET', body, decode, rawText } = options;
+  const { pathParams, queryParams, method = 'GET', body, encode, decode, rawText } = options;
   let path: string = route;
 
   if (Array.isArray(pathParams)) {
@@ -40,7 +45,12 @@ export const fulfillmentFetch: ApiFetch = async <T = unknown>(
     credentials: 'include',
     method,
     headers: { 'Content-Type': 'application/json' },
-    body: body !== undefined ? JSON.stringify(body) : undefined,
+    body:
+      body !== undefined
+        ? JSON.stringify(
+            encode ? encodeFulfillmentBody(encode, body as MessageInitShape<typeof encode>) : body,
+          )
+        : undefined,
   });
 
   if (res.status === 401) {

@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react';
+import { type MessageInitShape } from '@bufbuild/protobuf';
 import { useMutation } from '@tanstack/react-query';
 
 import {
@@ -56,10 +57,11 @@ export const useProvisionCluster = () => {
   const apiFetch = useApiFetch();
   const qc = useApiQueryClient();
   return useMutation({
-    mutationFn: (cluster: Cluster) =>
+    mutationFn: (cluster: MessageInitShape<typeof ClusterSchema>) =>
       apiFetch<Cluster>('v1/clusters', {
         method: 'POST',
         body: cluster,
+        encode: ClusterSchema,
         decode: ClusterSchema,
       }),
     onSuccess: async () => {

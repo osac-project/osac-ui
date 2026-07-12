@@ -1,4 +1,11 @@
-import { type JsonValue, createRegistry, fromJson } from '@bufbuild/protobuf';
+import {
+  type JsonValue,
+  type MessageInitShape,
+  create,
+  createRegistry,
+  fromJson,
+  toJson,
+} from '@bufbuild/protobuf';
 import {
   file_google_protobuf_duration,
   file_google_protobuf_struct,
@@ -22,6 +29,18 @@ const fulfillmentDecodeRegistry = createRegistry(
   file_google_protobuf_duration,
   file_google_protobuf_struct,
 );
+
+export const encodeFulfillmentBody = <S extends FulfillmentDecodeSchema>(
+  schema: S,
+  body: MessageInitShape<S>,
+): JsonValue => {
+  try {
+    const message = create(schema, body);
+    return toJson(schema, message, { registry: fulfillmentDecodeRegistry });
+  } catch (error) {
+    throw new Error(`Protobuf encode failed: ${getErrorMessage(error)}`);
+  }
+};
 
 export const decodeFulfillmentResponse = (
   schema: FulfillmentDecodeSchema | undefined,

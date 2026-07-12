@@ -80,6 +80,8 @@ export type ApiFetchOptions = {
   method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
   /** Request body — serialised to JSON by the provider. */
   body?: unknown;
+  /** Encode the request body with protobuf `toJson` using the given message schema. */
+  encode?: FulfillmentDecodeSchema;
   /** Parse the response with protobuf `fromJson` using the given message schema. */
   decode?: FulfillmentDecodeSchema;
   /** Return the response as raw text instead of parsing as JSON. */
