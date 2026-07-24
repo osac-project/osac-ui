@@ -19,6 +19,7 @@ import { useBareMetalInstanceCatalogItems } from '@osac/ui-components/api/v1/bar
 import { usePrivateBareMetalInstanceCatalogItems } from '@osac/ui-components/api/v1/private/baremetal-instance-catalog-item';
 import CatalogItemCard from '@osac/ui-components/components/catalog/CatalogItemCard';
 import {
+  CatalogItem,
   type PublicationFilter,
   catalogItemScope,
   filterCatalogItemsBySearch,
@@ -55,7 +56,9 @@ const BareMetalInstanceCatalogManagementPanel = ({
     undefined,
     isActive && isProviderAdmin,
   );
-  const { data = [], isLoading, error, isSuccess } = isProviderAdmin ? privateResult : publicResult;
+  const result = isProviderAdmin ? privateResult : publicResult;
+  const { isLoading, error, isSuccess } = result;
+  const data: CatalogItem[] = result.data ?? [];
 
   const filteredItems = filterCatalogItemsBySearch(data, search).filter((item) =>
     matchesPublicationFilter(item, publicationFilter),

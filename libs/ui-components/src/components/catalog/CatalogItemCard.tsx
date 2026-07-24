@@ -13,11 +13,7 @@ import {
 } from '@patternfly/react-core';
 
 import type { CatalogItem } from './catalogItemDisplay';
-import {
-  catalogItemMetadataLabelEntries,
-  catalogItemResourceParts,
-  catalogItemSubtitle,
-} from './catalogItemDisplay';
+import { catalogItemMetadataLabelEntries, catalogItemSubtitle } from './catalogItemDisplay';
 import { useTranslation } from '../../hooks/useTranslation';
 import { CatalogItemIcon } from '../../icons';
 
@@ -47,7 +43,6 @@ const CatalogItemCard = ({
   statusLabel,
 }: CatalogItemCardProps) => {
   const { t } = useTranslation();
-  const resources = catalogItemResourceParts(item);
   const metadataLabels = catalogItemMetadataLabelEntries(item);
   const subtitle = catalogItemSubtitle(item);
   const isBrowseMode = Boolean(onOpenDetails && !selection);
@@ -115,26 +110,8 @@ const CatalogItemCard = ({
               </Flex>
             </StackItem>
           ) : null}
-          {resources.length > 0 ? (
-            <StackItem>
-              <Flex flexWrap={{ default: 'wrap' }} gap={{ default: 'gapSm' }}>
-                {resources.map((resource, index) => (
-                  <FlexItem key={`${item.id}-resource-${index}`}>
-                    <Label variant="outline" color="blue" isCompact>
-                      {resource}
-                    </Label>
-                  </FlexItem>
-                ))}
-              </Flex>
-            </StackItem>
-          ) : null}
           {metadataLabels.length > 0 ? (
             <>
-              {resources.length > 0 ? (
-                <StackItem>
-                  <Divider />
-                </StackItem>
-              ) : null}
               <StackItem>
                 <Flex flexWrap={{ default: 'wrap' }} gap={{ default: 'gapSm' }}>
                   {metadataLabels.map(({ key, value }) => (

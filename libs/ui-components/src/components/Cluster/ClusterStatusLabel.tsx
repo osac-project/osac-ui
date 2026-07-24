@@ -11,6 +11,8 @@ const CLUSTER_STATUS_MAP: Record<ClusterState, { status: StatusKind; text: strin
   [ClusterState.PROGRESSING]: { status: 'progressing', text: 'Provisioning' },
   [ClusterState.READY]: { status: 'ready', text: 'Ready' },
   [ClusterState.FAILED]: { status: 'failed', text: 'Failed' },
+  [ClusterState.DELETING]: { status: 'progressing', text: 'Deleting' },
+  [ClusterState.DELETE_FAILED]: { status: 'failed', text: 'Delete failed' },
 };
 
 const resolveClusterStatus = (state?: ClusterState): { status: StatusKind; text: string } => {

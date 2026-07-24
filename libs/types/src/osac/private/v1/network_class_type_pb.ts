@@ -44,6 +44,8 @@ export const file_osac_private_v1_network_class_type: GenFile = /*@__PURE__*/
  * creating VirtualNetworks. The `implementation_strategy` field is the key identifier that VirtualNetwork resources
  * reference to select their network backend.
  *
+ * buf:lint:ignore OSAC_OBJECT_SHAPE
+ *
  * @generated from message osac.private.v1.NetworkClass
  */
 export type NetworkClass = Message<"osac.private.v1.NetworkClass"> & {

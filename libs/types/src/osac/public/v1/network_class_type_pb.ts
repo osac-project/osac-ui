@@ -44,6 +44,8 @@ export const file_osac_public_v1_network_class_type: GenFile = /*@__PURE__*/
  * Users query available NetworkClasses to discover which network types they can choose when
  * creating VirtualNetworks.
  *
+ * buf:lint:ignore OSAC_OBJECT_SHAPE
+ *
  * @generated from message osac.public.v1.NetworkClass
  */
 export type NetworkClass = Message<"osac.public.v1.NetworkClass"> & {

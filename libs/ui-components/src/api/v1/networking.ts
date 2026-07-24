@@ -69,6 +69,20 @@ export const useSecurityGroups = (
   });
 };
 
+const securityGroupIdsFilter = (ids: string[]): string =>
+  ids.map((id) => `this.id == "${escapeCelStringLiteral(id)}"`).join(' || ');
+
+export const useSecurityGroupsByIds = (ids: string[]) => {
+  const client = useApiFetch(SecurityGroups);
+  const hasIds = ids.length > 0;
+  return useApiQuery({
+    queryKey: apiQueryKey('v1/security_groups', ids),
+    queryFn: () => client.list({ filter: securityGroupIdsFilter(ids) }),
+    select: (data) => data.items,
+    enabled: hasIds,
+  });
+};
+
 export const virtualNetworkFilterForSubnetList = (virtualNetworkId: string): string =>
   combineListFilters(virtualNetworkScopeFilter(virtualNetworkId), SUBNET_READY_LIST_FILTER);
 

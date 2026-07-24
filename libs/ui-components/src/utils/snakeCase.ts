@@ -1,4 +1,4 @@
-const toSnakeCase = (str: string): string =>
+export const toSnakeCase = (str: string): string =>
   str.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
 
 export const camelKeysToSnake = <T = unknown>(obj: T): T => {
@@ -15,5 +15,3 @@ export const camelKeysToSnake = <T = unknown>(obj: T): T => {
   }
   return obj;
 };
-
-export { toSnakeCase };

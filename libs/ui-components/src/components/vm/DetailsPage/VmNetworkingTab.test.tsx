@@ -25,17 +25,10 @@ describe('VmNetworkingTab', () => {
         },
       ],
       catalogItemId: 'catalog-rhel-9',
-      hasCatalogItem: true,
       isCatalogItemLoading: false,
       instanceType: undefined,
       instanceTypeId: undefined,
       isInstanceTypeLoading: false,
-      fieldLabels: {
-        sshKey: '',
-        image: '',
-        bootDisk: '',
-        userData: '',
-      },
       catalogItem: undefined,
     });
 
@@ -57,17 +50,10 @@ describe('VmNetworkingTab', () => {
     vi.mocked(useVmDetailsDisplay).mockReturnValue({
       networkingRows: [],
       catalogItemId: undefined,
-      hasCatalogItem: false,
       isCatalogItemLoading: false,
       instanceType: undefined,
       instanceTypeId: undefined,
       isInstanceTypeLoading: false,
-      fieldLabels: {
-        sshKey: '',
-        image: '',
-        bootDisk: '',
-        userData: '',
-      },
       catalogItem: undefined,
     });
 

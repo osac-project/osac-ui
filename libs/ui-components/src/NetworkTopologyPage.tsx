@@ -62,12 +62,7 @@ const readSubnet = (vm: ComputeInstance): string => {
 };
 
 const readIpAddress = (vm: ComputeInstance): string | undefined => {
-  return (
-    vm.status?.publicIpAddress?.trim() ||
-    vm.status?.internalIpAddress?.trim() ||
-    wireStr(vm.status, 'public_ip_address', 'publicIpAddress') ||
-    wireStr(vm.status, 'internal_ip_address', 'internalIpAddress', 'ipAddress')
-  );
+  return vm.status?.externalIpAddress || vm.status?.internalIpAddress;
 };
 
 const groupBySubnet = (vms: ComputeInstance[]): SubnetGroup[] => {
