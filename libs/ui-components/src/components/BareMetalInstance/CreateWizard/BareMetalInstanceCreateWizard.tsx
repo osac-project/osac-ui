@@ -9,7 +9,6 @@ import {
   PageSection,
   PageSectionTypes,
   Spinner,
-  Stack,
   Title,
   Wizard,
   WizardStep,
@@ -56,14 +55,6 @@ export const BareMetalInstanceCreateWizard = () => {
     ? catalogItems.find((item) => item.id === catalogItemId)
     : undefined;
 
-  if (catalogItemId && isLoading) {
-    return (
-      <Bullseye>
-        <Spinner aria-label={t('Loading catalog')} />
-      </Bullseye>
-    );
-  }
-
   const initialValues = buildBmInitialValues(initialItem);
 
   const onSubmit = async (
@@ -90,22 +81,20 @@ export const BareMetalInstanceCreateWizard = () => {
       {(formik) => (
         <>
           <PageSection hasBodyWrapper={false}>
-            <Stack hasGutter>
-              <Breadcrumb>
-                <BreadcrumbItem>
-                  <Button variant="link" isInline onClick={() => navigate('/bare-metal')}>
-                    {t('Bare Metal')}
-                  </Button>
-                </BreadcrumbItem>
-                <BreadcrumbItem isActive>{t('Provision bare metal')}</BreadcrumbItem>
-              </Breadcrumb>
-              <Title headingLevel="h1" size="3xl">
-                {t('Provision bare metal')}
-              </Title>
-              <Content component="p">
-                {t('Provision a bare metal instance from a catalog item.')}
-              </Content>
-            </Stack>
+            <Breadcrumb>
+              <BreadcrumbItem>
+                <Button variant="link" isInline onClick={() => navigate('/bare-metal')}>
+                  {t('Bare Metal')}
+                </Button>
+              </BreadcrumbItem>
+              <BreadcrumbItem isActive>{t('Provision bare metal')}</BreadcrumbItem>
+            </Breadcrumb>
+            <Title headingLevel="h1" size="3xl">
+              {t('Provision bare metal')}
+            </Title>
+            <Content component="p">
+              {t('Provision a bare metal instance from a catalog item.')}
+            </Content>
           </PageSection>
           <FieldValidationProvider>
             <LeaveFormConfirmation />

@@ -1,13 +1,12 @@
 import { useField, useFormikContext } from 'formik';
 
-import { FieldDefinition } from '@osac/types';
+import { type FieldDefinition } from '@osac/types';
 
 import { isFieldEditable } from './utils';
 import { useTranslation } from '../../hooks/useTranslation';
 import { InputField } from '../Form/InputField';
 
 interface SshKeyFieldProps {
-  path?: string;
   fieldDefinitions: FieldDefinition[];
 }
 

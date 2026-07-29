@@ -9,7 +9,6 @@ import {
   PageSection,
   PageSectionTypes,
   Spinner,
-  Stack,
   Title,
   Wizard,
   WizardStep,
@@ -48,7 +47,7 @@ const ClusterCreateWizard = () => {
     ? catalogItems.find((item) => item.id === catalogItemId)
     : undefined;
 
-  if ((catalogItemId && isLoading) || templatesLoading) {
+  if (isLoading || templatesLoading) {
     return (
       <Bullseye>
         <Spinner aria-label={t('Loading catalog')} />
@@ -82,22 +81,20 @@ const ClusterCreateWizard = () => {
       {(formik) => (
         <>
           <PageSection hasBodyWrapper={false}>
-            <Stack hasGutter>
-              <Breadcrumb>
-                <BreadcrumbItem>
-                  <Button variant="link" isInline onClick={() => navigate('/clusters')}>
-                    {t('Clusters')}
-                  </Button>
-                </BreadcrumbItem>
-                <BreadcrumbItem isActive>{t('Create cluster')}</BreadcrumbItem>
-              </Breadcrumb>
-              <Title headingLevel="h1" size="3xl">
-                {t('Create cluster')}
-              </Title>
-              <Content component="p">
-                {t('Select a catalog item, configure, and provision an OpenShift cluster.')}
-              </Content>
-            </Stack>
+            <Breadcrumb>
+              <BreadcrumbItem>
+                <Button variant="link" isInline onClick={() => navigate('/clusters')}>
+                  {t('Clusters')}
+                </Button>
+              </BreadcrumbItem>
+              <BreadcrumbItem isActive>{t('Create cluster')}</BreadcrumbItem>
+            </Breadcrumb>
+            <Title headingLevel="h1" size="3xl">
+              {t('Create cluster')}
+            </Title>
+            <Content component="p">
+              {t('Select a catalog item, configure, and provision an OpenShift cluster.')}
+            </Content>
           </PageSection>
           <FieldValidationProvider>
             <LeaveFormConfirmation />

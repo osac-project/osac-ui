@@ -1,4 +1,4 @@
-import { TFunction } from 'i18next';
+import { type TFunction } from 'i18next';
 import * as Yup from 'yup';
 
 export const SSH_PUBLIC_KEY_REGEX =

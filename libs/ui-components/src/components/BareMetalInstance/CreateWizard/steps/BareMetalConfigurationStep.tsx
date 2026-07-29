@@ -1,5 +1,5 @@
 import { useFormikContext } from 'formik';
-import { TFunction } from 'i18next';
+import { type TFunction } from 'i18next';
 
 import UserDataField from '@osac/ui-components/components/catalogProvision/UserDataField';
 import { isFieldEditable } from '@osac/ui-components/components/catalogProvision/utils';

@@ -1,7 +1,7 @@
 import Ajv, { type ValidateFunction } from 'ajv';
 import * as Yup from 'yup';
 
-import { FieldDefinition } from '@osac/types';
+import { type FieldDefinition } from '@osac/types';
 
 import { getFieldDefinition, isFieldEditable } from './utils';
 

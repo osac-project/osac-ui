@@ -1,4 +1,4 @@
-import { FieldDefinition } from '@osac/types';
+import { type FieldDefinition } from '@osac/types';
 import { InputField } from '@osac/ui-components/components/Form/InputField';
 import { useTranslation } from '@osac/ui-components/hooks/useTranslation';
 

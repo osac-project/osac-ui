@@ -44,7 +44,7 @@ const ComputeInstanceProvisionWizard = () => {
     ? catalogItems.find((item) => item.id === catalogItemId)
     : undefined;
 
-  if (catalogItemId && isLoading) {
+  if (isLoading) {
     return (
       <Bullseye>
         <Spinner aria-label={t('Loading catalog')} />
@@ -93,7 +93,11 @@ const ComputeInstanceProvisionWizard = () => {
           </PageSection>
           <FieldValidationProvider>
             <LeaveFormConfirmation />
-            <PageSection hasBodyWrapper={false} type={PageSectionTypes.wizard}>
+            <PageSection
+              hasBodyWrapper={false}
+              type={PageSectionTypes.wizard}
+              aria-label={t('Compute instance provisioning wizard')}
+            >
               <Wizard
                 navAriaLabel={t('Create virtual machine steps')}
                 isVisitRequired

@@ -1,4 +1,4 @@
-import { ComputeInstanceCatalogItem } from '@osac/types';
+import { type ComputeInstanceCatalogItem } from '@osac/types';
 
 import { getNumberDefaultValue, getStringDefaultValue } from '../../catalogProvision/utils';
 import { clearSchemaCache } from '../../catalogProvision/validation';
@@ -71,7 +71,7 @@ export const buildVmInitialValues = (
   }
 
   const defaultBootDisk = getNumberDefaultValue('boot_disk.size_gib', fds);
-  if (defaultBootDisk) {
+  if (defaultBootDisk !== undefined) {
     base.spec.bootDisk.sizeGib = defaultBootDisk;
   }
 

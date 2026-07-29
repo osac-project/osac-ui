@@ -1,6 +1,6 @@
 import { useFormikContext } from 'formik';
 
-import { FieldDefinition } from '@osac/types';
+import { type FieldDefinition } from '@osac/types';
 import NameField from '@osac/ui-components/components/catalogProvision/NameField';
 import SshKeyField from '@osac/ui-components/components/catalogProvision/SshKeyField';
 import { isFieldEditable } from '@osac/ui-components/components/catalogProvision/utils';

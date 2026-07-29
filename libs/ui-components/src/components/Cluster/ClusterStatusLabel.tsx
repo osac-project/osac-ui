@@ -15,21 +15,10 @@ const CLUSTER_STATUS_MAP: Record<ClusterState, { status: StatusKind; text: strin
   [ClusterState.DELETE_FAILED]: { status: 'failed', text: 'Delete failed' },
 };
 
-const resolveClusterStatus = (state?: ClusterState): { status: StatusKind; text: string } => {
-  switch (state) {
-    case ClusterState.PROGRESSING:
-      return CLUSTER_STATUS_MAP[ClusterState.PROGRESSING];
-    case ClusterState.READY:
-      return CLUSTER_STATUS_MAP[ClusterState.READY];
-    case ClusterState.FAILED:
-      return CLUSTER_STATUS_MAP[ClusterState.FAILED];
-    default:
-      return CLUSTER_STATUS_MAP[ClusterState.UNSPECIFIED];
-  }
-};
-
 export const ClusterStatusLabel = ({ state }: ClusterStatusLabelProps) => {
-  const { status, text } = resolveClusterStatus(state);
+  const { status, text } = state
+    ? CLUSTER_STATUS_MAP[state]
+    : CLUSTER_STATUS_MAP[ClusterState.UNSPECIFIED];
 
   return <ResourceStatusLabel status={status} text={text} />;
 };

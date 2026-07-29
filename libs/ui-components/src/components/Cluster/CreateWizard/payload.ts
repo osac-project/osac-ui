@@ -3,7 +3,7 @@ import type { MessageInitShape } from '@bufbuild/protobuf';
 import { ClusterSchema } from '@osac/types';
 
 import type { ClusterWizardValues } from './values';
-import { isFieldEditable } from '../../catalogProvision/utils';
+import { getFieldDefinition, isFieldEditable } from '../../catalogProvision/utils';
 
 export const buildClusterCreatePayload = (
   values: ClusterWizardValues,
@@ -44,28 +44,34 @@ export const buildClusterCreatePayload = (
       };
     }
 
-    if (isFieldEditable('node_sets', fds)) {
+    const nodeSetsFd = getFieldDefinition('node_sets', fds);
+
+    if (nodeSetsFd?.editable === true) {
       const nodeSets = values.spec.nodeSetRows.reduce(
         (acc, curr) => {
-          acc[curr.name] = {
-            size: curr.size,
-          };
+          const nodeSetFd = getFieldDefinition(`node_sets.${curr.name}.size`, fds);
+
+          if (!nodeSetFd || nodeSetFd.editable === true) {
+            acc[curr.name] = {
+              size: curr.size,
+            };
+          }
           return acc;
         },
         {} as { [key: string]: { size: number } },
       );
 
       cluster.spec.nodeSets = nodeSets;
-    }
-
-    for (const nodeSet of values.spec.nodeSetRows) {
-      if (isFieldEditable(`node_sets.${nodeSet.name}.size`, fds)) {
-        cluster.spec.nodeSets = {
-          ...(cluster.spec.nodeSets || {}),
-          [nodeSet.name]: {
-            size: nodeSet.size,
-          },
-        };
+    } else if (!nodeSetsFd) {
+      for (const nodeSet of values.spec.nodeSetRows) {
+        if (isFieldEditable(`node_sets.${nodeSet.name}.size`, fds)) {
+          cluster.spec.nodeSets = {
+            ...(cluster.spec.nodeSets || {}),
+            [nodeSet.name]: {
+              size: nodeSet.size,
+            },
+          };
+        }
       }
     }
   }
