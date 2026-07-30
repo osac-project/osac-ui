@@ -1,0 +1,231 @@
+import { Route, Routes } from 'react-router-dom';
+import { screen, waitFor } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
+
+import type { ClusterCatalogItem, Metadata } from '@osac/types';
+import type { ClusterCatalogItem as PrivateClusterCatalogItem } from '@osac/types/private';
+
+import CatalogItemDetailActionButtons from './CatalogItemDetailActionButtons';
+import { renderWithProviders } from '../../test-utils/TestProviders';
+
+const publicMetadata = (overrides: Partial<Metadata> = {}): Metadata => ({
+  $typeName: 'osac.public.v1.Metadata',
+  name: 'catalog-1',
+  annotations: {},
+  creator: 'test-user',
+  labels: {},
+  project: '',
+  tenant: '',
+  version: 1,
+  ...overrides,
+});
+
+const publicItem = (overrides: Partial<ClusterCatalogItem> = {}): ClusterCatalogItem => ({
+  $typeName: 'osac.public.v1.ClusterCatalogItem',
+  id: 'catalog-1',
+  title: 'OpenShift 4 cluster',
+  description: '',
+  template: 'tpl-openshift-4',
+  published: true,
+  fieldDefinitions: [],
+  ...overrides,
+});
+
+const privateItem = (
+  overrides: Partial<PrivateClusterCatalogItem> = {},
+): PrivateClusterCatalogItem => ({
+  $typeName: 'osac.private.v1.ClusterCatalogItem',
+  id: 'catalog-1',
+  title: 'OpenShift 4 cluster',
+  description: '',
+  template: 'tpl-openshift-4',
+  published: true,
+  tenant: '',
+  fieldDefinitions: [],
+  ...overrides,
+});
+
+describe('CatalogItemDetailActionButtons', () => {
+  it('renders all actions for providerAdmin on an organization-scoped item', () => {
+    renderWithProviders(
+      <CatalogItemDetailActionButtons
+        catalogItem={privateItem({ tenant: 'acme-corp' })}
+        role="providerAdmin"
+        editHref="/admin/catalog/cluster/catalog-1/edit"
+        onDeleteClick={vi.fn()}
+        onTogglePublish={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByRole('button', { name: 'Edit' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Delete' })).toBeInTheDocument();
+    expect(screen.getByRole('switch')).toBeInTheDocument();
+  });
+
+  it('renders all actions for providerAdmin even on a general (global) item — CSP Admin is never hidden', () => {
+    renderWithProviders(
+      <CatalogItemDetailActionButtons
+        catalogItem={privateItem({ tenant: '' })}
+        role="providerAdmin"
+        editHref="/admin/catalog/cluster/catalog-1/edit"
+        onDeleteClick={vi.fn()}
+        onTogglePublish={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByRole('button', { name: 'Edit' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Delete' })).toBeInTheDocument();
+    expect(screen.getByRole('switch')).toBeInTheDocument();
+  });
+
+  it('renders all actions for tenantAdmin on an organization-scoped item', () => {
+    renderWithProviders(
+      <CatalogItemDetailActionButtons
+        catalogItem={publicItem({ metadata: publicMetadata({ tenant: 'acme-corp' }) })}
+        role="tenantAdmin"
+        editHref="/admin/catalog/cluster/catalog-1/edit"
+        onDeleteClick={vi.fn()}
+        onTogglePublish={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByRole('button', { name: 'Edit' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Delete' })).toBeInTheDocument();
+    expect(screen.getByRole('switch')).toBeInTheDocument();
+  });
+
+  it('renders all actions for tenantAdmin on a project-scoped item', () => {
+    renderWithProviders(
+      <CatalogItemDetailActionButtons
+        catalogItem={publicItem({ metadata: publicMetadata({ project: 'frontend' }) })}
+        role="tenantAdmin"
+        editHref="/admin/catalog/cluster/catalog-1/edit"
+        onDeleteClick={vi.fn()}
+        onTogglePublish={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByRole('button', { name: 'Edit' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Delete' })).toBeInTheDocument();
+    expect(screen.getByRole('switch')).toBeInTheDocument();
+  });
+
+  it('hides all actions for tenantAdmin on a general (global) item', () => {
+    const { container } = renderWithProviders(
+      <CatalogItemDetailActionButtons
+        catalogItem={publicItem()}
+        role="tenantAdmin"
+        editHref="/admin/catalog/cluster/catalog-1/edit"
+        onDeleteClick={vi.fn()}
+        onTogglePublish={vi.fn()}
+      />,
+    );
+
+    expect(screen.queryByRole('button')).not.toBeInTheDocument();
+    expect(screen.queryByRole('switch')).not.toBeInTheDocument();
+    expect(container).toBeEmptyDOMElement();
+  });
+
+  it('calls onDeleteClick when Delete is clicked', async () => {
+    const onDeleteClick = vi.fn();
+    const { user } = renderWithProviders(
+      <CatalogItemDetailActionButtons
+        catalogItem={privateItem()}
+        role="providerAdmin"
+        editHref="/admin/catalog/cluster/catalog-1/edit"
+        onDeleteClick={onDeleteClick}
+        onTogglePublish={vi.fn()}
+      />,
+    );
+
+    await user.click(screen.getByRole('button', { name: 'Delete' }));
+    expect(onDeleteClick).toHaveBeenCalled();
+  });
+
+  it('calls onTogglePublish when the switch is toggled', async () => {
+    const onTogglePublish = vi.fn();
+    const { user } = renderWithProviders(
+      <CatalogItemDetailActionButtons
+        catalogItem={privateItem({ published: true })}
+        role="providerAdmin"
+        editHref="/admin/catalog/cluster/catalog-1/edit"
+        onDeleteClick={vi.fn()}
+        onTogglePublish={onTogglePublish}
+      />,
+    );
+
+    await user.click(screen.getByRole('switch'));
+    expect(onTogglePublish).toHaveBeenCalledWith(false);
+  });
+
+  it('navigates to editHref when Edit is clicked', async () => {
+    const { user } = renderWithProviders(
+      <Routes>
+        <Route
+          path="/admin/catalog/cluster/:id"
+          element={
+            <CatalogItemDetailActionButtons
+              catalogItem={privateItem()}
+              role="providerAdmin"
+              editHref="/admin/catalog/cluster/catalog-1/edit"
+              onDeleteClick={vi.fn()}
+              onTogglePublish={vi.fn()}
+            />
+          }
+        />
+        <Route path="/admin/catalog/cluster/:id/edit" element={<div>edit-page</div>} />
+      </Routes>,
+      { routerEntries: ['/admin/catalog/cluster/catalog-1'] },
+    );
+
+    await user.click(screen.getByRole('button', { name: 'Edit' }));
+
+    await waitFor(() => {
+      expect(screen.getByText('edit-page')).toBeInTheDocument();
+    });
+  });
+
+  it('disables Delete and the publish toggle and shows a tooltip when disabledReason is set', async () => {
+    const onDeleteClick = vi.fn();
+    const onTogglePublish = vi.fn();
+    const { user } = renderWithProviders(
+      <CatalogItemDetailActionButtons
+        catalogItem={privateItem()}
+        role="providerAdmin"
+        editHref="/admin/catalog/cluster/catalog-1/edit"
+        onDeleteClick={onDeleteClick}
+        onTogglePublish={onTogglePublish}
+        disabledReason="Deleting and publishing catalog items is not yet available."
+      />,
+    );
+
+    const deleteButton = screen.getByRole('button', { name: 'Delete' });
+    expect(deleteButton).toHaveAttribute('aria-disabled', 'true');
+    await user.click(deleteButton);
+    expect(onDeleteClick).not.toHaveBeenCalled();
+
+    expect(screen.getByRole('switch')).toBeDisabled();
+    await user.click(screen.getByRole('switch'));
+    expect(onTogglePublish).not.toHaveBeenCalled();
+
+    await user.hover(deleteButton);
+    expect(
+      await screen.findAllByText('Deleting and publishing catalog items is not yet available.'),
+    ).not.toHaveLength(0);
+  });
+
+  it('does not disable Delete or the publish toggle when disabledReason is not set', () => {
+    renderWithProviders(
+      <CatalogItemDetailActionButtons
+        catalogItem={privateItem()}
+        role="providerAdmin"
+        editHref="/admin/catalog/cluster/catalog-1/edit"
+        onDeleteClick={vi.fn()}
+        onTogglePublish={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByRole('button', { name: 'Delete' })).not.toHaveAttribute('aria-disabled');
+    expect(screen.getByRole('switch')).not.toBeDisabled();
+  });
+});

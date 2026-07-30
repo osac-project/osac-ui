@@ -1,3 +1,5 @@
+import type { TFunction } from 'i18next';
+
 import type {
   BareMetalInstanceCatalogItem,
   ClusterCatalogItem,
@@ -173,6 +175,41 @@ export const formatCatalogFieldDefault = (def: CatalogFieldDefinition): string =
     return '—';
   }
   return fieldDefinitionDefaultToInputString(defaultValue) || '—';
+};
+
+export const formatCatalogFieldValidationSummary = (
+  def: CatalogFieldDefinition,
+  t: TFunction,
+): string => {
+  const schema = def.validationSchema;
+  if (!schema || !Object.keys(schema).length) {
+    return '—';
+  }
+
+  const parts: string[] = [];
+  if (schema.type === 'integer') {
+    parts.push(t('whole number'));
+  }
+  if (typeof schema.minimum === 'number') {
+    parts.push(t('min: {{value}}', { value: schema.minimum }));
+  }
+  if (typeof schema.maximum === 'number') {
+    parts.push(t('max: {{value}}', { value: schema.maximum }));
+  }
+  if (typeof schema.minLength === 'number') {
+    parts.push(t('min length: {{value}}', { value: schema.minLength }));
+  }
+  if (typeof schema.maxLength === 'number') {
+    parts.push(t('max length: {{value}}', { value: schema.maxLength }));
+  }
+  if (typeof schema.pattern === 'string' && schema.pattern) {
+    parts.push(t('pattern: {{value}}', { value: schema.pattern }));
+  }
+  if (Array.isArray(schema.enum) && schema.enum.length > 0) {
+    parts.push(t('enum: [{{value}}]', { value: schema.enum.map(String).join(', ') }));
+  }
+
+  return parts.length > 0 ? parts.join(', ') : '—';
 };
 
 /**
