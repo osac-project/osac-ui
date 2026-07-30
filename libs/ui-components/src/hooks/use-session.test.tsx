@@ -1,12 +1,14 @@
 import { renderHook } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import { SessionProvider, useSession } from './use-session';
+
+const noop = vi.fn();
 
 describe('useSession', () => {
   it('exposes tenantId from provider', () => {
     const wrapper = ({ children }: { children: React.ReactNode }) => (
-      <SessionProvider role="tenant-user" username="alice" tenantId="t-123">
+      <SessionProvider role="tenant-user" username="alice" tenantId="t-123" logout={noop}>
         {children}
       </SessionProvider>
     );
@@ -20,7 +22,7 @@ describe('useSession', () => {
 
   it('exposes an empty tenantId when provider receives an empty string', () => {
     const wrapper = ({ children }: { children: React.ReactNode }) => (
-      <SessionProvider role="admin" username="bob" tenantId="">
+      <SessionProvider role="admin" username="bob" tenantId="" logout={noop}>
         {children}
       </SessionProvider>
     );

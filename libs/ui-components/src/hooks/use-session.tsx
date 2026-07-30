@@ -7,6 +7,7 @@ interface SessionContextValue {
   role: UserRole;
   username: string;
   tenantId: string;
+  logout: () => Promise<void>;
   userTheme: Theme;
   resolvedTheme: ResolvedTheme;
   setUserTheme: (theme: Theme) => void;
@@ -19,9 +20,16 @@ interface SessionProviderProps {
   role: UserRole;
   username: string;
   tenantId: string;
+  logout: () => Promise<void>;
 }
 
-export const SessionProvider = ({ children, role, username, tenantId }: SessionProviderProps) => {
+export const SessionProvider = ({
+  children,
+  role,
+  username,
+  tenantId,
+  logout,
+}: SessionProviderProps) => {
   const themeProps = useTheme();
 
   return role ? (
@@ -30,6 +38,7 @@ export const SessionProvider = ({ children, role, username, tenantId }: SessionP
         role,
         username,
         tenantId,
+        logout,
         ...themeProps,
       }}
     >

@@ -1,8 +1,7 @@
-import { type ReactNode } from 'react';
-import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
+import { Navigate, Route, Routes } from 'react-router-dom';
 import { Page } from '@patternfly/react-core';
 
-import ErrorBoundary from '@osac/ui-components/components/ErrorBoundary/ErrorBoundary';
+import RoleRoute from '@osac/ui-components/components/Resource/RoleRoute';
 import { VmDetailsPage } from '@osac/ui-components/components/vm/VmDetailsPage';
 import { useSession } from '@osac/ui-components/hooks/use-session';
 import { SecurityGroupDetailPage } from '@osac/ui-components/pages/networking/SecurityGroupDetailPage';
@@ -19,102 +18,92 @@ import { ShellMasthead } from './ShellMasthead';
 import { defaultRouteForRole } from './shellRoutes';
 import { ShellSidebar } from './ShellSidebar';
 
-const ShellRoute = ({ children }: { children: ReactNode }) => {
-  const { pathname } = useLocation();
-
-  return <ErrorBoundary key={pathname}>{children}</ErrorBoundary>;
-};
-
-export const AppShell = ({ logout }: { logout: () => Promise<void> }) => {
+export const AppShell = () => {
   const { role } = useSession();
 
   const defaultRoute = defaultRouteForRole(role);
 
   return (
-    <Page
-      masthead={<ShellMasthead onLogout={logout} />}
-      sidebar={<ShellSidebar />}
-      isManagedSidebar
-    >
+    <Page masthead={<ShellMasthead />} sidebar={<ShellSidebar />} isManagedSidebar>
       <Routes>
         <Route
           path="/vms"
           element={
-            <ShellRoute>
+            <RoleRoute allowedRoles={['tenant-user', 'tenant-admin', 'admin']}>
               <VmListPage />
-            </ShellRoute>
+            </RoleRoute>
           }
         />
         <Route
           path="/vms/create/:catalogItemId?"
           element={
-            <ShellRoute>
+            <RoleRoute allowedRoles={['tenant-user', 'tenant-admin', 'admin']}>
               <VmCreatePage />
-            </ShellRoute>
+            </RoleRoute>
           }
         />
         <Route
           path="/vms/:id"
           element={
-            <ShellRoute>
+            <RoleRoute allowedRoles={['tenant-user', 'tenant-admin', 'admin']}>
               <VmDetailsPage />
-            </ShellRoute>
+            </RoleRoute>
           }
         />
         <Route
           path="/catalog"
           element={
-            <ShellRoute>
+            <RoleRoute allowedRoles={['tenant-user', 'tenant-admin', 'admin']}>
               <CatalogPage />
-            </ShellRoute>
+            </RoleRoute>
           }
         />
         <Route
           path="/clusters/*"
           element={
-            <ShellRoute>
+            <RoleRoute allowedRoles={['tenant-user', 'tenant-admin', 'admin']}>
               <ClusterRoutes />
-            </ShellRoute>
+            </RoleRoute>
           }
         />
         <Route
           path="/bare-metal/*"
           element={
-            <ShellRoute>
+            <RoleRoute allowedRoles={['tenant-user', 'tenant-admin', 'admin']}>
               <BareMetalRoutes />
-            </ShellRoute>
+            </RoleRoute>
           }
         />
         <Route
           path="/networking/virtual-networks"
           element={
-            <ShellRoute>
+            <RoleRoute allowedRoles={['tenant-user', 'tenant-admin', 'admin']}>
               <VirtualNetworksListPage />
-            </ShellRoute>
+            </RoleRoute>
           }
         />
         <Route
           path="/networking/virtual-networks/:id"
           element={
-            <ShellRoute>
+            <RoleRoute allowedRoles={['tenant-user', 'tenant-admin', 'admin']}>
               <VirtualNetworkDetailPage />
-            </ShellRoute>
+            </RoleRoute>
           }
         />
         <Route
           path="/networking/security-groups"
           element={
-            <ShellRoute>
+            <RoleRoute allowedRoles={['tenant-user', 'tenant-admin', 'admin']}>
               <SecurityGroupsListPage />
-            </ShellRoute>
+            </RoleRoute>
           }
         />
         <Route
           path="/networking/security-groups/:id"
           element={
-            <ShellRoute>
+            <RoleRoute allowedRoles={['tenant-user', 'tenant-admin', 'admin']}>
               <SecurityGroupDetailPage />
-            </ShellRoute>
+            </RoleRoute>
           }
         />
         <Route path="*" element={<Navigate to={defaultRoute} replace />} />

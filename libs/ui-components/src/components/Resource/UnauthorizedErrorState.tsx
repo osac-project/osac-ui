@@ -8,23 +8,16 @@ import {
 } from '@patternfly/react-core';
 import LockIcon from '@patternfly/react-icons/dist/esm/icons/lock-icon';
 
+import { useSession } from '../../hooks/use-session';
 import { useTranslation } from '../../hooks/useTranslation';
 
 interface UnauthorizedErrorStateProps {
   headingLevel?: EmptyStateProps['headingLevel'];
 }
 
-const signInAgain = async () => {
-  try {
-    await fetch('/api/logout', { method: 'POST', credentials: 'include' });
-  } catch {
-    // Best effort before restarting login.
-  }
-  window.location.href = '/';
-};
-
 const UnauthorizedErrorState = ({ headingLevel = 'h2' }: UnauthorizedErrorStateProps) => {
   const { t } = useTranslation();
+  const { logout } = useSession();
 
   return (
     <EmptyState
@@ -36,7 +29,7 @@ const UnauthorizedErrorState = ({ headingLevel = 'h2' }: UnauthorizedErrorStateP
       <EmptyStateBody>{t('You are not authorized to access this resource.')}</EmptyStateBody>
       <EmptyStateFooter>
         <EmptyStateActions>
-          <Button variant="primary" onClick={() => void signInAgain()}>
+          <Button variant="primary" onClick={() => void logout()}>
             {t('Sign in again')}
           </Button>
         </EmptyStateActions>

@@ -47,11 +47,11 @@ const App = () => {
   }
 
   return (
-    <SessionProvider role={role} username={username} tenantId={tenantId}>
+    <SessionProvider role={role} username={username} tenantId={tenantId} logout={logout}>
       <Routes>
         <Route path="/" element={<LoggedInHomeRedirect />} />
 
-        <Route path="/*" element={<AppShell logout={logout} />} />
+        <Route path="/*" element={<AppShell />} />
       </Routes>
     </SessionProvider>
   );

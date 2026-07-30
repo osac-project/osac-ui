@@ -15,6 +15,9 @@ import {
 } from './createMockConnectTransport';
 import en from '../../../i18n/locales/en/translation.json';
 import { ApiProvider } from '../api/api-context';
+import { SessionProvider } from '../hooks/use-session';
+
+const noop = () => Promise.resolve();
 
 const createTestI18n = () => {
   const instance = i18n.createInstance();
@@ -55,9 +58,11 @@ export const TestProviders = ({
   return (
     <MemoryRouter initialEntries={routerEntries}>
       <I18nextProvider i18n={i18nInstance}>
-        <ApiProvider transport={transport}>
-          <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-        </ApiProvider>
+        <SessionProvider role="tenant-user" username="test-user" tenantId="t-test" logout={noop}>
+          <ApiProvider transport={transport}>
+            <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+          </ApiProvider>
+        </SessionProvider>
       </I18nextProvider>
     </MemoryRouter>
   );
