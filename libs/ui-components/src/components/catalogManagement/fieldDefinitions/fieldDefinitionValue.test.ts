@@ -1,0 +1,155 @@
+import { describe, expect, it } from 'vitest';
+
+import { buildFieldDefinition, fieldDefinitionValueSchema } from './fieldDefinitionValue';
+import { tIdentity } from '../../../test-utils/i18n';
+
+describe('buildFieldDefinition', () => {
+  it('builds a field definition from a string default with no validation', () => {
+    const result = buildFieldDefinition('release_image', 'Release Image', {
+      editable: false,
+      default: 'quay.io/openshift/release:latest',
+    });
+
+    expect(result.path).toBe('release_image');
+    expect(result.displayName).toBe('Release Image');
+    expect(result.editable).toBe(false);
+    expect(result.validationSchema).toBe('');
+    expect(result.default).toEqual({
+      kind: { case: 'stringValue', value: 'quay.io/openshift/release:latest' },
+    });
+  });
+
+  it('builds a field definition from a number default', () => {
+    const result = buildFieldDefinition('cores', 'Cores', { editable: true, default: 4 });
+
+    expect(result.default).toEqual({ kind: { case: 'numberValue', value: 4 } });
+  });
+
+  it('builds a field definition from a boolean default', () => {
+    const result = buildFieldDefinition('is_windows', 'Is Windows', {
+      editable: true,
+      default: false,
+    });
+
+    expect(result.default).toEqual({ kind: { case: 'boolValue', value: false } });
+  });
+
+  it('serializes validation constraints as a JSON string', () => {
+    const result = buildFieldDefinition('pod_cidr', 'Pod CIDR', {
+      editable: true,
+      default: '10.128.0.0/14',
+      validation: { pattern: '^([0-9]{1,3}\\.){3}[0-9]{1,3}/[0-9]{1,2}$' },
+    });
+
+    expect(JSON.parse(result.validationSchema)).toEqual({
+      pattern: '^([0-9]{1,3}\\.){3}[0-9]{1,3}/[0-9]{1,2}$',
+    });
+  });
+
+  it('omits validationSchema when no validation is configured', () => {
+    const result = buildFieldDefinition('user_data', 'User Data', {
+      editable: true,
+      default: '',
+    });
+
+    expect(result.validationSchema).toBe('');
+  });
+});
+
+describe('fieldDefinitionValueSchema', () => {
+  const schema = fieldDefinitionValueSchema(tIdentity);
+
+  it('requires a default value when editable is false', async () => {
+    await expect(schema.validate({ editable: false, default: '' })).rejects.toThrow(
+      'Default value is required for non-editable fields',
+    );
+  });
+
+  it('allows an empty default value when editable is true', async () => {
+    await expect(schema.validate({ editable: true, default: '' })).resolves.toEqual({
+      editable: true,
+      default: '',
+    });
+  });
+
+  it('passes when a non-editable field has a default value', async () => {
+    await expect(schema.validate({ editable: false, default: 'value' })).resolves.toEqual({
+      editable: false,
+      default: 'value',
+    });
+  });
+});
+
+describe('fieldDefinitionValueSchema with a format test', () => {
+  const schema = fieldDefinitionValueSchema(tIdentity, {
+    name: 'even-length',
+    message: 'Value must have an even length',
+    test: (value) => typeof value !== 'string' || value.length % 2 === 0,
+  });
+
+  it('applies the format test to a provided default', async () => {
+    await expect(schema.validate({ editable: true, default: 'odd' })).rejects.toThrow(
+      'Value must have an even length',
+    );
+  });
+
+  it('passes the format test for a valid default', async () => {
+    await expect(schema.validate({ editable: true, default: 'even' })).resolves.toEqual({
+      editable: true,
+      default: 'even',
+    });
+  });
+
+  it('still enforces the required-when-non-editable rule alongside the format test', async () => {
+    await expect(schema.validate({ editable: false, default: '' })).rejects.toThrow(
+      'Default value is required for non-editable fields',
+    );
+  });
+});
+
+describe('fieldDefinitionValueSchema validation metadata', () => {
+  const schema = fieldDefinitionValueSchema(tIdentity);
+
+  it('rejects a malformed regex pattern', async () => {
+    await expect(
+      schema.validate({ editable: true, default: '', validation: { pattern: '[unterminated' } }),
+    ).rejects.toThrow('Must be a valid regular expression');
+  });
+
+  it('accepts a well-formed regex pattern', async () => {
+    await expect(
+      schema.validate({ editable: true, default: '', validation: { pattern: '^[a-z]+$' } }),
+    ).resolves.toMatchObject({ validation: { pattern: '^[a-z]+$' } });
+  });
+
+  it('rejects a non-numeric minimum', async () => {
+    await expect(
+      schema.validate({ editable: true, default: '', validation: { minimum: 'not-a-number' } }),
+    ).rejects.toThrow('Must be a number');
+  });
+
+  it('rejects a non-numeric maximum', async () => {
+    await expect(
+      schema.validate({ editable: true, default: '', validation: { maximum: 'not-a-number' } }),
+    ).rejects.toThrow('Must be a number');
+  });
+
+  it('rejects a maximum lower than the minimum', async () => {
+    await expect(
+      schema.validate({ editable: true, default: '', validation: { minimum: '10', maximum: '5' } }),
+    ).rejects.toThrow('Maximum must be greater than or equal to minimum');
+  });
+
+  it('accepts a maximum equal to the minimum', async () => {
+    await expect(
+      schema.validate({ editable: true, default: '', validation: { minimum: '5', maximum: '5' } }),
+    ).resolves.toMatchObject({ validation: { minimum: '5', maximum: '5' } });
+  });
+
+  it('accepts omitted validation metadata', async () => {
+    await expect(schema.validate({ editable: true, default: '' })).resolves.toMatchObject({
+      editable: true,
+      default: '',
+    });
+  });
+});

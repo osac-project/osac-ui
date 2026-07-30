@@ -2,7 +2,7 @@ import React, { type ReactNode, createElement } from 'react';
 import { createRouterTransport } from '@connectrpc/connect';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, renderHook, waitFor } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import type { BareMetalInstanceCatalogItem } from '@osac/types';
 import {
@@ -10,13 +10,16 @@ import {
   BareMetalInstanceRunStrategy,
   BareMetalInstances,
 } from '@osac/types';
+import { BareMetalInstanceCatalogItems as PrivateBareMetalInstanceCatalogItems } from '@osac/types/private';
 
 import {
   type PatchBareMetalInstanceInput,
   useBareMetalInstanceCatalogItems,
+  useCreateBareMetalInstanceCatalogItem,
   usePatchBareMetalInstance,
 } from './baremetal-instance';
 import { createCatalogHookTests } from '../../test-utils/catalogHookTestHelpers';
+import { renderHookWithTransport as renderWithTransport } from '../../test-utils/renderHookWithTransport';
 import { ApiProvider } from '../api-context';
 
 const item: BareMetalInstanceCatalogItem = {
@@ -42,6 +45,50 @@ describe('useBareMetalInstanceCatalogItems', () => {
           return { items: [item] };
         },
       }),
+  });
+});
+
+const makeItem = (id: string) => ({ id, title: `item-${id}` });
+
+describe('useCreateBareMetalInstanceCatalogItem', () => {
+  it('calls the private client for providerAdmin', async () => {
+    const createFn = vi.fn(() => ({ object: makeItem('a') }));
+    const transport = createRouterTransport((router) => {
+      router.service(PrivateBareMetalInstanceCatalogItems, { create: createFn });
+    });
+
+    const { result } = renderWithTransport(
+      () => useCreateBareMetalInstanceCatalogItem(),
+      transport,
+      'providerAdmin',
+    );
+
+    act(() => {
+      result.current.mutate({ title: 'item-a', published: false });
+    });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(createFn).toHaveBeenCalled();
+  });
+
+  it('calls the public client for tenantAdmin', async () => {
+    const createFn = vi.fn(() => ({ object: makeItem('b') }));
+    const transport = createRouterTransport((router) => {
+      router.service(BareMetalInstanceCatalogItems, { create: createFn });
+    });
+
+    const { result } = renderWithTransport(
+      () => useCreateBareMetalInstanceCatalogItem(),
+      transport,
+      'tenantAdmin',
+    );
+
+    act(() => {
+      result.current.mutate({ title: 'item-b', published: false });
+    });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(createFn).toHaveBeenCalled();
   });
 });
 

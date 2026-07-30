@@ -11,8 +11,8 @@ export * from './osac/public/v1/compute_instance_catalog_items_service_pb.js'
 export * from './osac/public/v1/instance_type_type_pb.js'
 export * from './osac/public/v1/instance_types_service_pb.js'
 
-export * from './osac/public/v1/organization_type_pb.js'
-export * from './osac/public/v1/organizations_service_pb.js'
+export * from './osac/public/v1/tenant_type_pb.js'
+export * from './osac/public/v1/tenants_service_pb.js'
 
 export * from './osac/public/v1/user_type_pb.js'
 export * from './osac/public/v1/users_service_pb.js'
@@ -56,3 +56,8 @@ export * from './osac/public/v1/baremetal_instance_type_pb.js';
 export * from './osac/public/v1/baremetal_instances_service_pb.js';
 export * from './osac/public/v1/baremetal_instance_catalog_item_type_pb.js';
 export * from './osac/public/v1/baremetal_instance_catalog_items_service_pb.js';
+export * from './osac/public/v1/baremetal_instance_template_type_pb.js';
+export * from './osac/public/v1/baremetal_instance_templates_service_pb.js';
+
+export * from './osac/public/v1/project_type_pb.js';
+export * from './osac/public/v1/projects_service_pb.js';
