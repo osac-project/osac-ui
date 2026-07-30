@@ -1,5 +1,12 @@
 import React from 'react';
-import { BrowserRouter } from 'react-router-dom';
+import { RouterProvider, createBrowserRouter } from 'react-router-dom';
+import { createRegistry } from '@bufbuild/protobuf';
+import {
+  file_google_protobuf_duration,
+  file_google_protobuf_struct,
+  file_google_protobuf_timestamp,
+  file_google_protobuf_wrappers,
+} from '@bufbuild/protobuf/wkt';
 import { createConnectTransport } from '@connectrpc/connect-web';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createRoot } from 'react-dom/client';
@@ -12,6 +19,14 @@ import './i18n';
 const connectTransport = createConnectTransport({
   baseUrl: '/api/fulfillment',
   interceptors: [connectErrorInterceptor],
+  jsonOptions: {
+    registry: createRegistry(
+      file_google_protobuf_wrappers,
+      file_google_protobuf_struct,
+      file_google_protobuf_timestamp,
+      file_google_protobuf_duration,
+    ),
+  },
 });
 
 // CSS load order is intentional: base → addons → local overrides
@@ -34,6 +49,8 @@ const queryClient = new QueryClient({
   },
 });
 
+const router = createBrowserRouter([{ path: '*', element: <App /> }]);
+
 const rootElement = document.getElementById('root');
 
 if (rootElement) {
@@ -41,9 +58,7 @@ if (rootElement) {
     <React.StrictMode>
       <ApiProvider transport={connectTransport}>
         <QueryClientProvider client={queryClient}>
-          <BrowserRouter>
-            <App />
-          </BrowserRouter>
+          <RouterProvider router={router} />
         </QueryClientProvider>
       </ApiProvider>
     </React.StrictMode>,

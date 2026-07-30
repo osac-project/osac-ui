@@ -37,7 +37,7 @@ const catalogVm: ComputeInstance = {
   spec: {
     $typeName: 'osac.public.v1.ComputeInstanceSpec',
     catalogItem: 'catalog-rhel-9',
-    sshKey: 'ssh-rsa AAAA...',
+    sshPublicKey: 'ssh-rsa AAAA...',
     image: {
       $typeName: 'osac.public.v1.ComputeInstanceImage',
       sourceRef: 'quay.io/example/rhel9',
@@ -63,7 +63,6 @@ describe('VmDetailsCard', () => {
   it('shows catalog fields with full SSH key', () => {
     vi.mocked(useVmDetailsDisplay).mockReturnValue({
       catalogItemId: 'catalog-rhel-9',
-      hasCatalogItem: true,
       isCatalogItemLoading: false,
       instanceType: {
         $typeName: 'osac.public.v1.InstanceType',
@@ -88,54 +87,33 @@ describe('VmDetailsCard', () => {
       },
       instanceTypeId: 'standard-4-8',
       isInstanceTypeLoading: false,
-      fieldLabels: {
-        sshKey: 'SSH public key',
-        image: 'VM image',
-        bootDisk: 'Boot disk',
-        userData: 'User Data',
-      },
       networkingRows: [],
       catalogItem: undefined,
-    });
+    } as ReturnType<typeof useVmDetailsDisplay>);
 
     renderCard();
 
     expect(screen.getByText('Details')).toBeInTheDocument();
     expect(screen.getByText('web-01')).toBeInTheDocument();
     expect(screen.getByText('ssh-rsa AAAA...')).toBeInTheDocument();
-    expect(screen.getByText('40 GB')).toBeInTheDocument();
+    expect(screen.getByText('40')).toBeInTheDocument();
     expect(screen.getByText('alice')).toBeInTheDocument();
-    expect(screen.queryByText('User Data')).not.toBeInTheDocument();
-    expect(screen.queryByText('Run strategy')).not.toBeInTheDocument();
-    expect(screen.queryByText('Tenants')).not.toBeInTheDocument();
-    expect(screen.queryByText('Version')).not.toBeInTheDocument();
-    expect(screen.queryByText('Creators')).not.toBeInTheDocument();
     expect(screen.getByText('Creator')).toBeInTheDocument();
   });
 
-  it('shows degraded message when catalog item is missing', () => {
+  it('shows details with fallback values when catalog item is missing', () => {
     vi.mocked(useVmDetailsDisplay).mockReturnValue({
       catalogItemId: undefined,
-      hasCatalogItem: false,
       isCatalogItemLoading: false,
       instanceType: undefined,
       instanceTypeId: undefined,
       isInstanceTypeLoading: false,
-      fieldLabels: {
-        sshKey: 'SSH public key',
-        image: 'VM image',
-        bootDisk: 'Boot disk',
-        userData: 'User Data',
-      },
       networkingRows: [],
       catalogItem: undefined,
-    });
+    } as ReturnType<typeof useVmDetailsDisplay>);
 
     renderCard({ id: 'vm-2', metadata: { name: 'legacy-vm' } } as ComputeInstance);
-    expect(
-      screen.getByText('Catalog configuration is unavailable for this virtual machine.'),
-    ).toBeInTheDocument();
+    expect(screen.getByText('Details')).toBeInTheDocument();
     expect(screen.getByText('legacy-vm')).toBeInTheDocument();
-    expect(screen.queryByText('SSH public key')).not.toBeInTheDocument();
   });
 });

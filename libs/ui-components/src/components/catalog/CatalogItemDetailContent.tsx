@@ -16,11 +16,9 @@ import { CatalogFieldEditabilityLabel } from './CatalogFieldEditabilityLabel';
 import {
   type CatalogItem,
   catalogItemMetadataLabelEntries,
-  catalogItemResourceParts,
   formatCatalogFieldDefault,
 } from './catalogItemDisplay';
 import { useTranslation } from '../../hooks/useTranslation';
-import { catalogItemFieldDefinitions } from '../catalogProvision/catalogFieldDefinition';
 import { SubtleContent } from '../SubtleContent/SubtleContent';
 
 interface CatalogItemDetailContentProps {
@@ -29,9 +27,8 @@ interface CatalogItemDetailContentProps {
 
 export const CatalogItemDetailContent = ({ item }: CatalogItemDetailContentProps) => {
   const { t } = useTranslation();
-  const resources = catalogItemResourceParts(item);
   const metadataLabels = catalogItemMetadataLabelEntries(item);
-  const fieldDefinitions = catalogItemFieldDefinitions(item);
+  const fieldDefinitions = item.fieldDefinitions;
 
   return (
     <Stack className="catalog-item-detail-content">
@@ -50,23 +47,6 @@ export const CatalogItemDetailContent = ({ item }: CatalogItemDetailContentProps
             Description
           </Title>
           <Content component="p">{item.description}</Content>
-        </StackItem>
-      ) : null}
-
-      {resources.length > 0 ? (
-        <StackItem>
-          <Title headingLevel="h3" size="md" className="catalog-item-detail-content__section-title">
-            Default resources
-          </Title>
-          <Flex flexWrap={{ default: 'wrap' }} gap={{ default: 'gapSm' }}>
-            {resources.map((resource, index) => (
-              <FlexItem key={`${item.id}-detail-resource-${index}`}>
-                <Label variant="outline" color="blue" isCompact>
-                  {resource}
-                </Label>
-              </FlexItem>
-            ))}
-          </Flex>
         </StackItem>
       ) : null}
 

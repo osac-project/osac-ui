@@ -2,8 +2,6 @@ import { MessageInitShape } from '@bufbuild/protobuf';
 import {
   Alert,
   Button,
-  // eslint-disable-next-line no-restricted-imports
-  Form,
   Modal,
   ModalBody,
   ModalFooter,
@@ -17,16 +15,15 @@ import * as Yup from 'yup';
 import { Protocol, type SecurityGroup, SecurityGroupSchema, type SecurityRule } from '@osac/types';
 
 import { type RuleFormValues, SecurityGroupRuleForm } from './SecurityGroupRuleForm';
-import { protocolToString } from './SecurityGroupRulesTable';
 import { toPlainRule } from './securityGroupRuleUtils';
 import { useUpdateSecurityGroup } from '../../api/v1/networking';
 import { useTranslation } from '../../hooks/useTranslation';
 import { getErrorMessage } from '../../utils/error';
-import { labeledResourceRefSchema } from '../Form/labeledResourceRefSchema';
+import OsacForm from '../Form/OsacForm';
 
 const createRuleValidationSchema = (t: TFunction) =>
   Yup.object({
-    protocol: labeledResourceRefSchema(t('Protocol is required')),
+    protocol: Yup.number().required(t('Protocol is required')),
     portFrom: Yup.string().when('protocol', {
       is: (protocol: { value?: string }) =>
         protocol?.value === String(Protocol.TCP) || protocol?.value === String(Protocol.UDP),
@@ -121,10 +118,7 @@ export const SecurityGroupRuleModal = ({
     ruleIndex !== undefined ? securityGroup.spec?.[direction]?.[ruleIndex] : undefined;
 
   const defaultValues: RuleFormValues = {
-    protocol: {
-      value: String(initialValues?.protocol ?? Protocol.TCP),
-      label: protocolToString(initialValues?.protocol ?? Protocol.TCP, t),
-    },
+    protocol: initialValues?.protocol ?? Protocol.TCP,
     portFrom: initialValues?.portFrom?.toString() ?? '',
     portTo: initialValues?.portTo?.toString() ?? '',
     ipv4Cidr: initialValues?.ipv4Cidr ?? '',
@@ -134,7 +128,7 @@ export const SecurityGroupRuleModal = ({
   const handleSubmit = async (values: RuleFormValues) => {
     try {
       const rule = {
-        protocol: Number(values.protocol.value),
+        protocol: values.protocol,
         ...(values.portFrom &&
           String(values.portFrom).trim() !== '' && {
             portFrom: parseInt(String(values.portFrom), 10),
@@ -187,7 +181,7 @@ export const SecurityGroupRuleModal = ({
         onSubmit={handleSubmit}
       >
         {({ handleSubmit: formikSubmit, isValid }) => (
-          <Form onSubmit={(e) => e.preventDefault()}>
+          <OsacForm>
             <ModalBody>
               {!!updateSecurityGroup.error && (
                 <Alert
@@ -214,7 +208,7 @@ export const SecurityGroupRuleModal = ({
                 {t('Cancel')}
               </Button>
             </ModalFooter>
-          </Form>
+          </OsacForm>
         )}
       </Formik>
     </Modal>

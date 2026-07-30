@@ -37,16 +37,36 @@ vi.mock('../../components/vm/VmInstanceTypeLabel', () => ({
 const { useComputeInstances } = await import('@osac/ui-components/api/v1/compute-instance');
 const { useInstanceTypes } = await import('@osac/ui-components/api/v1/instance-types');
 
-const vm = {
+const vm: ComputeInstance = {
+  $typeName: 'osac.public.v1.ComputeInstance',
   id: 'vm-1',
-  metadata: { name: 'web-01' },
-  spec: { instanceType: 'standard-4-8' },
+  metadata: {
+    $typeName: 'osac.public.v1.Metadata',
+    name: 'web-01',
+    annotations: {},
+    creator: 'foo',
+    labels: {},
+    project: 'foo',
+    tenant: 'foo',
+    version: 1,
+  },
+  spec: {
+    $typeName: 'osac.public.v1.ComputeInstanceSpec',
+    instanceType: 'standard-4-8',
+    additionalDisks: [],
+    catalogItem: 'foo',
+    networkAttachments: [],
+    template: 'foo',
+    templateParameters: {},
+  },
   status: {
+    $typeName: 'osac.public.v1.ComputeInstanceStatus',
     state: ComputeInstanceState.RUNNING,
     internalIpAddress: '10.0.0.5',
-    publicIpAddress: '203.0.113.1',
+    externalIpAddress: '203.0.113.1',
+    conditions: [],
   },
-} as ComputeInstance;
+};
 
 const renderPage = () => renderWithProviders(<VmListPage />);
 

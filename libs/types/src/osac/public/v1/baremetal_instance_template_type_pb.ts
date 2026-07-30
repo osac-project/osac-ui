@@ -35,6 +35,8 @@ export const file_osac_public_v1_baremetal_instance_template_type: GenFile = /*@
  * A bare metal instance template defines a hardware profile (host type, OS image, network configuration)
  * that can be used to create bare metal instances via a catalog item.
  *
+ * buf:lint:ignore OSAC_OBJECT_SHAPE
+ *
  * @generated from message osac.public.v1.BareMetalInstanceTemplate
  */
 export type BareMetalInstanceTemplate = Message<"osac.public.v1.BareMetalInstanceTemplate"> & {

@@ -2,7 +2,7 @@ import { FormGroup, TextArea, TextInput } from '@patternfly/react-core';
 import { useField } from 'formik';
 
 import { getVisibleFieldError } from './fieldError';
-import { useShowFieldValidationErrors } from './FieldValidationContext';
+import { useFieldValidation } from './FieldValidationContext';
 import { FormFieldHelper, getFormFieldHelperDescribedBy } from './FormFieldHelper';
 
 interface InputFieldProps {
@@ -32,8 +32,8 @@ export const InputField = ({
   helperText,
   onBlur,
 }: InputFieldProps) => {
-  const [field, meta] = useField<string>(name);
-  const showValidationErrors = useShowFieldValidationErrors();
+  const [field, meta, { setValue }] = useField<string | number>(name);
+  const { showErrors: showValidationErrors } = useFieldValidation();
   const error = getVisibleFieldError(meta, showValidationErrors);
   const validated = error ? 'error' : 'default';
   const helperDescribedBy = getFormFieldHelperDescribedBy(fieldId, error, helperText);
@@ -48,7 +48,7 @@ export const InputField = ({
           rows={rows}
           resizeOrientation={resizeOrientation}
           onChange={(_event, value) => {
-            void field.onChange({ target: { name, value } });
+            setValue(value);
           }}
           onBlur={(event) => {
             field.onBlur(event);
@@ -66,7 +66,11 @@ export const InputField = ({
           type={type}
           value={field.value ?? ''}
           onChange={(_event, value) => {
-            void field.onChange({ target: { name, value } });
+            if (type === 'number') {
+              setValue(Number(value));
+            } else {
+              setValue(value);
+            }
           }}
           onBlur={(event) => {
             field.onBlur(event);

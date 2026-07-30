@@ -19,6 +19,7 @@ import { useComputeInstanceCatalogItems } from '@osac/ui-components/api/v1/compu
 import { usePrivateComputeInstanceCatalogItems } from '@osac/ui-components/api/v1/private/compute-instance-catalog-item';
 import CatalogItemCard from '@osac/ui-components/components/catalog/CatalogItemCard';
 import {
+  type CatalogItem,
   type PublicationFilter,
   catalogItemScope,
   filterCatalogItemsBySearch,
@@ -55,7 +56,9 @@ const ComputeInstanceCatalogManagementPanel = ({
     undefined,
     isActive && isProviderAdmin,
   );
-  const { data = [], isLoading, error, isSuccess } = isProviderAdmin ? privateResult : publicResult;
+  const result = isProviderAdmin ? privateResult : publicResult;
+  const { isLoading, error, isSuccess } = result;
+  const data: CatalogItem[] = result.data ?? [];
 
   const filteredItems = filterCatalogItemsBySearch(data, search).filter((item) =>
     matchesPublicationFilter(item, publicationFilter),

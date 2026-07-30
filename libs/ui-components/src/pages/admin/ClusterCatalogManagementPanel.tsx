@@ -19,6 +19,7 @@ import { useClusterCatalogItems } from '@osac/ui-components/api/v1/cluster-catal
 import { usePrivateClusterCatalogItems } from '@osac/ui-components/api/v1/private/cluster-catalog-item';
 import CatalogItemCard from '@osac/ui-components/components/catalog/CatalogItemCard';
 import {
+  CatalogItem,
   type PublicationFilter,
   catalogItemScope,
   filterCatalogItemsBySearch,
@@ -52,7 +53,10 @@ const ClusterCatalogManagementPanel = ({
   const isProviderAdmin = role === 'providerAdmin';
   const publicResult = useClusterCatalogItems(undefined, isActive && !isProviderAdmin);
   const privateResult = usePrivateClusterCatalogItems(undefined, isActive && isProviderAdmin);
-  const { data = [], isLoading, error, isSuccess } = isProviderAdmin ? privateResult : publicResult;
+
+  const result = isProviderAdmin ? privateResult : publicResult;
+  const { isLoading, error, isSuccess } = result;
+  const data: CatalogItem[] = result.data ?? [];
 
   const filteredItems = filterCatalogItemsBySearch(data, search).filter((item) =>
     matchesPublicationFilter(item, publicationFilter),

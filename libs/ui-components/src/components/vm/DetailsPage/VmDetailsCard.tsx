@@ -15,9 +15,7 @@ import { useVmDetailsDisplay } from './useVmDetailsDisplay';
 import VmDetailsCatalogValue from './VmDetailsCatalogValue';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { displayValue } from '../../../utils/detailFormatters';
-import { formatBootDiskSizeForReview } from '../../catalogProvision/wizard/catalogOverlay';
 import { Timestamp } from '../../Primitives/Timestamp';
-import { SubtleContent } from '../../SubtleContent/SubtleContent';
 import { formatInstanceTypeReviewLabelFromType } from '../utils';
 
 interface Props {
@@ -28,80 +26,65 @@ const VmDetailsCard = ({ vm }: Props) => {
   const { t } = useTranslation();
   const {
     catalogItemId,
-    hasCatalogItem,
     isCatalogItemLoading,
     instanceType,
     instanceTypeId,
     isInstanceTypeLoading,
-    fieldLabels,
   } = useVmDetailsDisplay(vm);
 
   return (
     <Card isFullHeight>
       <CardTitle>{t('Details')}</CardTitle>
       <CardBody>
-        {!hasCatalogItem ? (
-          <SubtleContent component="p">
-            {t('Catalog configuration is unavailable for this virtual machine.')}
-          </SubtleContent>
-        ) : null}
         <DescriptionList isCompact>
-          {hasCatalogItem ? (
-            <DescriptionListGroup>
-              <DescriptionListTerm>{t('Catalog item')}</DescriptionListTerm>
-              <DescriptionListDescription>
-                {isCatalogItemLoading ? (
-                  <Skeleton width="150px" />
-                ) : (
-                  <VmDetailsCatalogValue catalogItemId={catalogItemId} />
-                )}
-              </DescriptionListDescription>
-            </DescriptionListGroup>
-          ) : null}
           <DescriptionListGroup>
-            <DescriptionListTerm>{t('catalogProvision.vm.fields.name')}</DescriptionListTerm>
+            <DescriptionListTerm>{t('Catalog item')}</DescriptionListTerm>
+            <DescriptionListDescription>
+              {isCatalogItemLoading ? (
+                <Skeleton width="150px" />
+              ) : (
+                <VmDetailsCatalogValue catalogItemId={catalogItemId} />
+              )}
+            </DescriptionListDescription>
+          </DescriptionListGroup>
+          <DescriptionListGroup>
+            <DescriptionListTerm>{t('Name')}</DescriptionListTerm>
             <DescriptionListDescription>
               {displayValue(vm.metadata?.name)}
             </DescriptionListDescription>
           </DescriptionListGroup>
-          {hasCatalogItem ? (
-            <>
-              <DescriptionListGroup>
-                <DescriptionListTerm>{fieldLabels.sshKey}</DescriptionListTerm>
-                <DescriptionListDescription>
-                  {displayValue(vm.spec?.sshKey)}
-                </DescriptionListDescription>
-              </DescriptionListGroup>
-              <DescriptionListGroup>
-                <DescriptionListTerm>{fieldLabels.image}</DescriptionListTerm>
-                <DescriptionListDescription>
-                  {displayValue(vm.spec?.image?.sourceRef)}
-                </DescriptionListDescription>
-              </DescriptionListGroup>
-              <DescriptionListGroup>
-                <DescriptionListTerm>
-                  {t('catalogProvision.vm.fields.instanceType')}
-                </DescriptionListTerm>
-                <DescriptionListDescription>
-                  {isInstanceTypeLoading && instanceTypeId?.trim() ? (
-                    <Skeleton width="150px" />
-                  ) : (
-                    formatInstanceTypeReviewLabelFromType(
-                      instanceType,
-                      t('catalogProvision.instanceTypes.deprecatedSuffix'),
-                      instanceTypeId,
-                    )
-                  )}
-                </DescriptionListDescription>
-              </DescriptionListGroup>
-              <DescriptionListGroup>
-                <DescriptionListTerm>{fieldLabels.bootDisk}</DescriptionListTerm>
-                <DescriptionListDescription>
-                  {formatBootDiskSizeForReview(vm.spec?.bootDisk?.sizeGib)}
-                </DescriptionListDescription>
-              </DescriptionListGroup>
-            </>
-          ) : null}
+          <DescriptionListGroup>
+            <DescriptionListTerm>{t('SSH public key')}</DescriptionListTerm>
+            <DescriptionListDescription>
+              {displayValue(vm.spec?.sshPublicKey)}
+            </DescriptionListDescription>
+          </DescriptionListGroup>
+          <DescriptionListGroup>
+            <DescriptionListTerm>{t('VM image')}</DescriptionListTerm>
+            <DescriptionListDescription>
+              {displayValue(vm.spec?.image?.sourceRef)}
+            </DescriptionListDescription>
+          </DescriptionListGroup>
+          <DescriptionListGroup>
+            <DescriptionListTerm>{t('Instance type')}</DescriptionListTerm>
+            <DescriptionListDescription>
+              {isInstanceTypeLoading && instanceTypeId?.trim() ? (
+                <Skeleton width="150px" />
+              ) : (
+                formatInstanceTypeReviewLabelFromType(
+                  instanceType,
+                  t(' (deprecated)'),
+                  instanceTypeId,
+                )
+              )}
+            </DescriptionListDescription>
+          </DescriptionListGroup>
+          <DescriptionListGroup>
+            <DescriptionListTerm>{t('Boot disk size')}</DescriptionListTerm>
+            <DescriptionListDescription>
+              {vm.spec?.bootDisk?.sizeGib || '-'}
+            </DescriptionListDescription>
+          </DescriptionListGroup>
           <DescriptionListGroup>
             <DescriptionListTerm>{t('Created')}</DescriptionListTerm>
             <DescriptionListDescription>

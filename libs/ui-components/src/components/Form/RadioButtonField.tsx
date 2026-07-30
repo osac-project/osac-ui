@@ -2,7 +2,7 @@ import { FormGroup, Radio } from '@patternfly/react-core';
 import { useField } from 'formik';
 
 import { getVisibleFieldError } from './fieldError';
-import { useShowFieldValidationErrors } from './FieldValidationContext';
+import { useFieldValidation } from './FieldValidationContext';
 import { FormFieldHelper } from './FormFieldHelper';
 
 export interface RadioButtonFieldOption {
@@ -30,7 +30,7 @@ export const RadioButtonField = ({
   isInline = false,
 }: RadioButtonFieldProps) => {
   const [field, meta] = useField<string | boolean>(name);
-  const showValidationErrors = useShowFieldValidationErrors();
+  const { showErrors: showValidationErrors } = useFieldValidation();
   const error = getVisibleFieldError(meta, showValidationErrors);
   const stringValue =
     field.value === true ? 'true' : field.value === false ? 'false' : String(field.value ?? '');

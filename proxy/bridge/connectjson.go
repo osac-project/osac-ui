@@ -37,7 +37,9 @@ import (
 	// "any JSON value"). Without these imports, a response containing one of the unlinked types
 	// fails to marshal with e.g. "unable to resolve type.googleapis.com/google.protobuf.Value:
 	// not found" (or .StringValue, .BoolValue, ... — whichever type wasn't yet linked).
+	_ "google.golang.org/protobuf/types/known/durationpb"
 	_ "google.golang.org/protobuf/types/known/structpb"
+	_ "google.golang.org/protobuf/types/known/timestamppb"
 	_ "google.golang.org/protobuf/types/known/wrapperspb"
 
 	"connectrpc.com/vanguard"

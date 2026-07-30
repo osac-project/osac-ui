@@ -3,6 +3,7 @@ import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { Page } from '@patternfly/react-core';
 
 import ErrorBoundary from '@osac/ui-components/components/ErrorBoundary/ErrorBoundary';
+import ComputeInstanceProvisionWizard from '@osac/ui-components/components/vm/CreateWizard/ComputeInstanceProvisionWizard';
 import { VmDetailsPage } from '@osac/ui-components/components/vm/VmDetailsPage';
 import { useSession } from '@osac/ui-components/hooks/use-session';
 import { SecurityGroupDetailPage } from '@osac/ui-components/pages/networking/SecurityGroupDetailPage';
@@ -12,7 +13,6 @@ import { VirtualNetworksListPage } from '@osac/ui-components/pages/networking/Vi
 import { BareMetalRoutes } from '@osac/ui-components/pages/tenant/BareMetalRoutes';
 import CatalogPage from '@osac/ui-components/pages/tenant/CatalogPage';
 import { ClusterRoutes } from '@osac/ui-components/pages/tenant/ClusterRoutes';
-import { VmCreatePage } from '@osac/ui-components/pages/tenant/VmCreatePage';
 import { VmListPage } from '@osac/ui-components/pages/tenant/VmListPage';
 
 import { AdminCatalogRoutes } from './AdminCatalogRoutes';
@@ -50,7 +50,7 @@ export const AppShell = ({ logout }: { logout: () => Promise<void> }) => {
           path="/vms/create/:catalogItemId?"
           element={
             <ShellRoute>
-              <VmCreatePage />
+              <ComputeInstanceProvisionWizard />
             </ShellRoute>
           }
         />

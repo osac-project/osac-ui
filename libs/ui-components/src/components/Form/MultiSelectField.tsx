@@ -1,12 +1,11 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { FormGroup } from '@patternfly/react-core';
 import { MultiTypeaheadSelect, type MultiTypeaheadSelectOption } from '@patternfly/react-templates';
 import { useField } from 'formik';
 
 import { getVisibleFieldError } from './fieldError';
-import { useShowFieldValidationErrors } from './FieldValidationContext';
+import { useFieldValidation } from './FieldValidationContext';
 import { FormFieldHelper } from './FormFieldHelper';
-import { type LabeledResourceRef } from './labeledResourceRef';
 import type { SelectFieldOption } from './SelectField';
 
 interface MultiSelectFieldProps {
@@ -37,46 +36,38 @@ export const MultiSelectField = ({
   noOptionsFoundMessage = (filter) => `No options found for "${filter}"`,
   autoSelectSingleOption = false,
 }: MultiSelectFieldProps) => {
-  const [field, meta, helpers] = useField<LabeledResourceRef[]>(name);
-  const showValidationErrors = useShowFieldValidationErrors();
+  const [field, meta, helpers] = useField<(string | number)[] | undefined>(name);
+  const { showErrors: showValidationErrors } = useFieldValidation();
   const error = getVisibleFieldError(meta, showValidationErrors);
   const validated = error ? 'error' : 'default';
   const effectivePlaceholder = isLoading ? loadingPlaceholder : placeholder;
   const controlDisabled = isDisabled || isLoading;
 
-  const selectedValues = useMemo(
-    () => (Array.isArray(field.value) ? field.value : []),
-    [field.value],
-  );
+  const defaultSelectedRef = useRef<boolean>(false);
 
   useEffect(() => {
     if (
+      defaultSelectedRef.current ||
       !autoSelectSingleOption ||
       isLoading ||
       isDisabled ||
       options.length !== 1 ||
-      selectedValues.length > 0
+      (field.value?.length || 0) > 0
     ) {
       return;
     }
-    void helpers.setValue([{ value: options[0].value, label: options[0].label }], false);
-  }, [autoSelectSingleOption, helpers, isDisabled, isLoading, options, selectedValues.length]);
+    defaultSelectedRef.current = true;
+    void helpers.setValue([options[0].value], false);
+  }, [autoSelectSingleOption, helpers, isDisabled, isLoading, options, field.value?.length]);
 
   const initialOptions = useMemo<MultiTypeaheadSelectOption[]>(() => {
     return options.map((option) => ({
       content: option.label,
       value: option.value,
-      selected: selectedValues.some((value) => value.value === option.value),
+      selected: field.value?.some((value) => value === option.value),
       isDisabled: option.isDisabled,
     }));
-  }, [options, selectedValues]);
-
-  const toLabeledResourceRefs = (selections: (string | number)[]) =>
-    selections.map((selection) => {
-      const value = String(selection);
-      const option = options.find((entry) => entry.value === value);
-      return option ? { value: option.value, label: option.label } : { value, label: value };
-    });
+  }, [options, field.value]);
 
   return (
     <FormGroup label={label} fieldId={fieldId} isRequired={isRequired}>
@@ -87,7 +78,7 @@ export const MultiSelectField = ({
         isDisabled={controlDisabled}
         noOptionsFoundMessage={noOptionsFoundMessage}
         onSelectionChange={(_event, selections) => {
-          void helpers.setValue(toLabeledResourceRefs(selections), true);
+          void helpers.setValue(selections, true);
           void helpers.setTouched(true);
         }}
         onToggle={(open) => {

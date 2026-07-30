@@ -124,6 +124,7 @@ export const createMockConnectTransport = (
       });
 
       router.service(ClusterTemplates, {
+        list: () => ({ items: clusterTemplates }),
         get: (req) => {
           const template = clusterTemplates.find((i) => i.id === req.id);
           if (!template) {

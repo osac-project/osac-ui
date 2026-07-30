@@ -78,7 +78,10 @@ const CatalogPage = () => {
 
   const { data = [], isLoading, error } = useCatalogItems(typeFilter);
 
-  const filteredItems = useMemo(() => filterCatalogItemsBySearch(data, search), [search, data]);
+  const filteredItems = useMemo(
+    () => filterCatalogItemsBySearch<CatalogItem>(data, search),
+    [search, data],
+  );
 
   const searchTerm = search.trim();
   const showEmptyState = !isLoading && !error && filteredItems.length === 0;
