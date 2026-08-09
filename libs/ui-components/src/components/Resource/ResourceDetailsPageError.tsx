@@ -4,6 +4,7 @@ import ExclamationTriangleIcon from '@patternfly/react-icons/dist/esm/icons/excl
 import SearchIcon from '@patternfly/react-icons/dist/esm/icons/search-icon';
 
 import QueryErrorPage from './QueryErrorPage';
+import { isNotFoundError } from '../../utils/error';
 import { isUnauthorizedError } from '../../utils/unauthorizedError';
 
 type ResourceDetailsPageErrorVariant = 'load-error' | 'not-found' | 'unauthorized';
@@ -15,8 +16,8 @@ type ResourceDetailsPageErrorProps = {
   onRetry?: () => void;
 } & ({ error: unknown; variant?: never } | { variant: 'not-found'; error?: never });
 
-const resolveVariant = (error: unknown): Exclude<ResourceDetailsPageErrorVariant, 'not-found'> =>
-  isUnauthorizedError(error) ? 'unauthorized' : 'load-error';
+const resolveVariant = (error: unknown): ResourceDetailsPageErrorVariant =>
+  isUnauthorizedError(error) ? 'unauthorized' : isNotFoundError(error) ? 'not-found' : 'load-error';
 
 const variantConfig = (
   resourceLabel: string,

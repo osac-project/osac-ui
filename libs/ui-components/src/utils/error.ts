@@ -1,3 +1,8 @@
+import { Code, ConnectError } from '@connectrpc/connect';
+
+export const isNotFoundError = (error: unknown): error is ConnectError =>
+  error instanceof ConnectError && error.code === Code.NotFound;
+
 const readJsonMessage = (value: unknown): string | undefined => {
   if (!value || typeof value !== 'object') {
     return undefined;

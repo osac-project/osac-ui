@@ -1,6 +1,24 @@
+import { Code, ConnectError } from '@connectrpc/connect';
 import { describe, expect, it } from 'vitest';
 
-import { formatHttpApiErrorMessage, parseHttpErrorBody } from './error';
+import { formatHttpApiErrorMessage, isNotFoundError, parseHttpErrorBody } from './error';
+
+describe('isNotFoundError', () => {
+  it('returns true for ConnectError with NotFound code', () => {
+    expect(isNotFoundError(new ConnectError('not found', Code.NotFound))).toBe(true);
+  });
+
+  it('returns false for ConnectError with other codes', () => {
+    expect(isNotFoundError(new ConnectError('internal', Code.Internal))).toBe(false);
+    expect(isNotFoundError(new ConnectError('denied', Code.PermissionDenied))).toBe(false);
+  });
+
+  it('returns false for non-ConnectError errors', () => {
+    expect(isNotFoundError(new Error('not found'))).toBe(false);
+    expect(isNotFoundError(null)).toBe(false);
+    expect(isNotFoundError(undefined)).toBe(false);
+  });
+});
 
 describe('parseHttpErrorBody', () => {
   it('extracts message from gRPC-gateway JSON errors', () => {

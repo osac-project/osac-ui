@@ -30,7 +30,7 @@ const BareMetalActionButtons = ({ instance }: BareMetalActionButtonsProps) => {
         <BareMetalDeleteConfirmModal
           instance={instance}
           onClose={() => setDeleteOpen(false)}
-          onSuccess={() => navigate('/bare-metal')}
+          onSuccess={() => navigate('/bare-metal', { replace: true })}
         />
       )}
       <Flex
