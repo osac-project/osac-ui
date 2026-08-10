@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import {
   Alert,
   Button,
@@ -28,29 +27,20 @@ const BareMetalDeleteConfirmModal = ({
   onSuccess,
 }: BareMetalDeleteConfirmModalProps) => {
   const { t } = useTranslation();
-  const [isPending, setIsPending] = useState(false);
   const deleteInstance = useDeleteBareMetalInstance();
 
   const name = instance.metadata?.name ?? instance.id;
 
-  const onDelete = async () => {
-    setIsPending(true);
+  const onDelete = () => {
     deleteInstance.reset();
-    try {
-      await deleteInstance.mutateAsync(instance.id);
-      onSuccess();
-    } catch {
-      // error is handled via deleteInstance.error state
-    } finally {
-      setIsPending(false);
-    }
+    deleteInstance.mutate(instance.id, { onSuccess });
   };
 
   return (
     <Modal
       variant="small"
       isOpen
-      onClose={isPending ? undefined : onClose}
+      onClose={deleteInstance.isPending ? undefined : onClose}
       aria-labelledby="bm-delete-confirm-title"
     >
       <ModalHeader
@@ -77,12 +67,12 @@ const BareMetalDeleteConfirmModal = ({
           key="delete"
           variant="danger"
           onClick={onDelete}
-          isDisabled={isPending}
-          isLoading={isPending}
+          isDisabled={deleteInstance.isPending}
+          isLoading={deleteInstance.isPending}
         >
           {t('Delete')}
         </Button>
-        <Button key="cancel" variant="link" onClick={onClose} isDisabled={isPending}>
+        <Button key="cancel" variant="link" onClick={onClose} isDisabled={deleteInstance.isPending}>
           {t('Cancel')}
         </Button>
       </ModalFooter>
