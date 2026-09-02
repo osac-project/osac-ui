@@ -2,10 +2,12 @@ import {
   type DescMessage,
   type DescMethodUnary,
   type DescService,
+  type Message,
   type MessageInitShape,
   type MessageShape,
   create,
 } from '@bufbuild/protobuf';
+import type { GenMessage } from '@bufbuild/protobuf/codegenv2';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { UseMutationOptions, UseQueryOptions } from '@tanstack/react-query';
 
@@ -29,6 +31,17 @@ type ResourceMutationOptions<Data extends DescMessage, Variables> = Omit<
   UseMutationOptions<MessageShape<Data>, Error, Variables>,
   'mutationFn'
 >;
+
+interface PaginatedListRequest extends Message {
+  limit?: number;
+  offset?: number;
+}
+
+interface PaginatedListResponse extends Message {
+  items: Message[];
+  size: number;
+  total: number;
+}
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   value !== null && typeof value === 'object';
@@ -67,6 +80,53 @@ export const useListResource = <Input extends DescMessage, Output extends DescMe
     ...options,
     queryKey: [service.typeName, 'list', request],
     queryFn: () => client.list(listRequest),
+  });
+};
+
+const ALL_RESOURCES_PAGE_SIZE = 100;
+
+export const useListAllResources = <
+  InputMessage extends PaginatedListRequest,
+  OutputMessage extends PaginatedListResponse,
+>(
+  service: ResourceService<'list', GenMessage<InputMessage>, GenMessage<OutputMessage>>,
+  request: MessageInitShape<GenMessage<InputMessage>> = create(service.method.list.input),
+  options: ResourceQueryOptions<GenMessage<OutputMessage>> = {},
+) => {
+  const client = useApiFetch(service);
+
+  return useQuery({
+    ...options,
+    queryKey: [service.typeName, 'listAll', request],
+    queryFn: async () => {
+      const getPage = (offset: number) =>
+        client.list(
+          create(service.method.list.input, {
+            ...request,
+            limit: ALL_RESOURCES_PAGE_SIZE,
+            offset,
+          }),
+        );
+      const firstPage = await getPage(0);
+      const items = [...firstPage.items];
+      let total = firstPage.total;
+
+      while (items.length < total) {
+        const page = await getPage(items.length);
+        if (page.items.length === 0) {
+          break;
+        }
+        items.push(...page.items);
+        total = page.total;
+      }
+
+      return {
+        ...firstPage,
+        items,
+        size: items.length,
+        total,
+      };
+    },
   });
 };
 

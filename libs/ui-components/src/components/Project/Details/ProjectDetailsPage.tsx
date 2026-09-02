@@ -15,8 +15,8 @@ import {
   Title,
 } from '@patternfly/react-core';
 
-import { Project } from '@osac/types';
-import { useProject } from '@osac/ui-components/api/v1/project';
+import { Project, Projects } from '@osac/types';
+import { useGetResource } from '@osac/ui-components/api/use-resource';
 import { useTranslation } from '@osac/ui-components/hooks/useTranslation';
 
 import { ResourceDetailHeader } from '../../Resource/ResourceDetailHeader';
@@ -102,7 +102,7 @@ const ProjectDetailsPage = () => {
   const { t } = useTranslation();
   const { id } = useParams() as { id: string };
 
-  const { data, isLoading, error, refetch } = useProject(id);
+  const { data, isLoading, error, refetch } = useGetResource(Projects, { id });
 
   return (
     <ResourceDetailsPage
@@ -113,7 +113,7 @@ const ProjectDetailsPage = () => {
       parentTo="/projects"
       refetch={refetch}
     >
-      {data && <ProjectDetailsPageContent project={data} />}
+      {data?.object && <ProjectDetailsPageContent project={data.object} />}
     </ResourceDetailsPage>
   );
 };

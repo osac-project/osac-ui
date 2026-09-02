@@ -13,8 +13,8 @@ import {
 import PlusCircleIcon from '@patternfly/react-icons/dist/esm/icons/plus-circle-icon';
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 
-import { Project } from '@osac/types';
-import { useProjectMemberships } from '@osac/ui-components/api/v1/project-membership';
+import { Project, ProjectMemberships } from '@osac/types';
+import { useListResource } from '@osac/ui-components/api/use-resource';
 import ResourceNameField from '@osac/ui-components/components/Resource/ResourceNameField.tsx';
 import { useSession } from '@osac/ui-components/hooks/use-session';
 import { useTranslation } from '@osac/ui-components/hooks/useTranslation';
@@ -30,7 +30,7 @@ const ProjectMembership = ({ project }: { project: Project }) => {
   const navigate = useNavigate();
   const { role } = useSession();
   const { t } = useTranslation();
-  const { data, isLoading, error } = useProjectMemberships({
+  const { data, isLoading, error } = useListResource(ProjectMemberships, {
     filter: `this.metadata.project == "${getFullProjectPath(project)}"`,
   });
 
@@ -49,7 +49,7 @@ const ProjectMembership = ({ project }: { project: Project }) => {
     );
   }
 
-  const content = data?.length ? (
+  const content = data?.items.length ? (
     <Table aria-label={t('Project memberships')} variant="compact">
       <Thead>
         <Tr>
@@ -61,7 +61,7 @@ const ProjectMembership = ({ project }: { project: Project }) => {
         </Tr>
       </Thead>
       <Tbody>
-        {data?.map((pm) => (
+        {data.items.map((pm) => (
           <Tr key={pm.id}>
             <Td dataLabel={t('Name')}>
               <ResourceNameField resource={pm} />

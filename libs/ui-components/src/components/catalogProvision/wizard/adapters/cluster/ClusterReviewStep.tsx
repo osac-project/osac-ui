@@ -11,13 +11,13 @@ import {
 } from '@patternfly/react-core';
 import { useFormikContext } from 'formik';
 
-import { HostType } from '@osac/types';
+import { HostType, Projects } from '@osac/types';
+import { useListResource } from '@osac/ui-components/api/use-resource';
 import {
   CLUSTER_VERSION_ACTIVE_LIST_FILTER,
   useClusterVersions,
 } from '@osac/ui-components/api/v1/cluster-versions';
 import { useHostTypes } from '@osac/ui-components/api/v1/host-types';
-import { useProjects } from '@osac/ui-components/api/v1/project';
 import { CatalogItem } from '@osac/ui-components/components/catalog/catalogItemDisplay';
 import {
   fullProjectPathToQueryFilter,
@@ -70,7 +70,7 @@ export const ClusterReviewStep = ({ catalogItem }: Props) => {
     data: projects,
     isLoading: projectsLoading,
     error: projectsError,
-  } = useProjects({ filter: fullProjectPathToQueryFilter(values.metadata.project) });
+  } = useListResource(Projects, { filter: fullProjectPathToQueryFilter(values.metadata.project) });
 
   const versionDisplay = versionDisplayName(
     findVersionByName(versions, values.spec.versionName),
@@ -117,7 +117,9 @@ export const ClusterReviewStep = ({ catalogItem }: Props) => {
           <DescriptionListGroup>
             <DescriptionListTerm>{t('Project')}</DescriptionListTerm>
             <DescriptionListDescription>
-              {projects?.length === 1 ? getProjectName(projects[0], t) : values.metadata.project}
+              {projects?.items.length === 1
+                ? getProjectName(projects.items[0], t)
+                : values.metadata.project}
             </DescriptionListDescription>
           </DescriptionListGroup>
           <DescriptionListGroup>

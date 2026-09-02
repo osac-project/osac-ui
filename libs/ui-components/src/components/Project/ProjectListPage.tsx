@@ -10,7 +10,8 @@ import {
 } from '@patternfly/react-core';
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 
-import { useProjects } from '@osac/ui-components/api/v1/project';
+import { Projects } from '@osac/types';
+import { useListResource } from '@osac/ui-components/api/use-resource';
 import ListPage from '@osac/ui-components/components/Page/ListPage';
 import ListPageBody from '@osac/ui-components/components/Page/ListPageBody';
 import { Timestamp } from '@osac/ui-components/components/Primitives/Timestamp';
@@ -29,20 +30,24 @@ const ProjectListPage = () => {
   const { role, tenantId } = useSession();
   const [search, setSearch] = useState('');
 
-  const { data: projects = [], isLoading, error } = useProjects();
+  const {
+    data: projects,
+    isLoading,
+    error,
+  } = useListResource(Projects, { filter: 'this.metadata.tenant != "shared"' });
 
   const canCreate = role === 'tenant-admin';
 
   const filteredProjects = useMemo(() => {
-    if (!search) {
-      return projects;
+    if (!search || !projects?.items) {
+      return projects?.items || [];
     }
     const lowerSearch = search.toLowerCase();
-    return projects.filter((project) => {
+    return projects.items.filter((project) => {
       const fullName = getProjectName(project, t);
       return fullName.toLowerCase().includes(lowerSearch);
     });
-  }, [search, projects, t]);
+  }, [search, projects?.items, t]);
 
   return (
     <ListPage
