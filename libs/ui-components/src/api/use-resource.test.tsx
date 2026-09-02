@@ -4,8 +4,18 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
-import { IdentityProviderSchema, IdentityProviders } from '@osac/types';
-import { TenantSchema, Tenants } from '@osac/types/private';
+import {
+  IdentityProviderSchema,
+  IdentityProviders,
+  StorageTiers as PublicStorageTiers,
+} from '@osac/types';
+import {
+  IdentityProviders as PrivateIdentityProviders,
+  StorageTiers as PrivateStorageTiers,
+  StorageTierSchema,
+  TenantSchema,
+  Tenants,
+} from '@osac/types/private';
 
 import { ApiProvider } from './api-context';
 import {
@@ -70,11 +80,13 @@ describe('resource queries', () => {
 });
 
 describe('resource mutations', () => {
-  it('calls create, update, and delete and invalidates every query for the service', async () => {
+  it('calls create, update, and delete and invalidates public and private queries', async () => {
     const transport = createMockConnectTransport();
     const { wrapper, queryClient } = makeWrapper(transport);
     const listKey = [IdentityProviders.typeName, 'list', {}] as const;
+    const privateListKey = [PrivateIdentityProviders.typeName, 'list', {}] as const;
     queryClient.setQueryData(listKey, { items: [] });
+    queryClient.setQueryData(privateListKey, { items: [] });
     const { result } = renderHook(
       () => ({
         create: useCreateResource(IdentityProviders),
@@ -88,6 +100,7 @@ describe('resource mutations', () => {
       await result.current.create.mutateAsync({ object: makeIdentityProvider('created') });
     });
     expect(queryClient.getQueryState(listKey)?.isInvalidated).toBe(true);
+    expect(queryClient.getQueryState(privateListKey)?.isInvalidated).toBe(true);
 
     await act(async () => {
       await result.current.update.mutateAsync({ object: makeIdentityProvider('updated') });
@@ -97,5 +110,24 @@ describe('resource mutations', () => {
     expect(result.current.create.data?.object?.id).toBe('created');
     expect(result.current.update.data?.object?.id).toBe('updated');
     expect(result.current.delete.isSuccess).toBe(true);
+  });
+
+  it('also invalidates public queries after a private resource mutation', async () => {
+    const transport = createMockConnectTransport();
+    const { wrapper, queryClient } = makeWrapper(transport);
+    const privateListKey = [PrivateStorageTiers.typeName, 'list', {}] as const;
+    const publicListKey = [PublicStorageTiers.typeName, 'list', {}] as const;
+    queryClient.setQueryData(privateListKey, { items: [] });
+    queryClient.setQueryData(publicListKey, { items: [] });
+    const { result } = renderHook(() => useCreateResource(PrivateStorageTiers), { wrapper });
+
+    await act(async () => {
+      await result.current.mutateAsync({
+        object: create(StorageTierSchema, { id: 'created' }),
+      });
+    });
+
+    expect(queryClient.getQueryState(privateListKey)?.isInvalidated).toBe(true);
+    expect(queryClient.getQueryState(publicListKey)?.isInvalidated).toBe(true);
   });
 });
