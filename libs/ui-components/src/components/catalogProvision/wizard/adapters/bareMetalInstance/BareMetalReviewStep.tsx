@@ -11,7 +11,8 @@ import {
 } from '@patternfly/react-core';
 import { useFormikContext } from 'formik';
 
-import { useProjects } from '@osac/ui-components/api/v1/project';
+import { Projects } from '@osac/types';
+import { useListResource } from '@osac/ui-components/api/use-resource';
 import { CatalogItem } from '@osac/ui-components/components/catalog/catalogItemDisplay';
 import {
   fullProjectPathToQueryFilter,
@@ -31,7 +32,7 @@ export const BareMetalReviewStep = ({ catalogItem }: Props) => {
   const { t } = useTranslation();
   const { values } = useFormikContext<BareMetalInstanceWizardValues>();
 
-  const { data, isLoading, error } = useProjects({
+  const { data, isLoading, error } = useListResource(Projects, {
     filter: fullProjectPathToQueryFilter(values.metadata.project),
   });
 
@@ -68,7 +69,9 @@ export const BareMetalReviewStep = ({ catalogItem }: Props) => {
           <DescriptionListGroup>
             <DescriptionListTerm>{t('Project')}</DescriptionListTerm>
             <DescriptionListDescription>
-              {data?.length === 1 ? getProjectName(data[0], t) : values.metadata.project}
+              {data?.items.length === 1
+                ? getProjectName(data.items[0], t)
+                : values.metadata.project}
             </DescriptionListDescription>
           </DescriptionListGroup>
           <DescriptionListGroup>

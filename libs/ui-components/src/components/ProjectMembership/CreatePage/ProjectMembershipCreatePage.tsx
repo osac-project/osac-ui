@@ -16,13 +16,12 @@ import {
 } from '@patternfly/react-core';
 import { Formik } from 'formik';
 
-import { ProjectMembershipRole } from '@osac/types';
-import { useProject } from '@osac/ui-components/api/v1/project';
+import { ProjectMembershipRole, ProjectMemberships, Projects } from '@osac/types';
 import {
-  useCreateProjectMembership,
-  useProjectMembership,
-  useUpdateProjectMembership,
-} from '@osac/ui-components/api/v1/project-membership';
+  useCreateResource,
+  useGetResource,
+  useUpdateResource,
+} from '@osac/ui-components/api/use-resource';
 import { useUsers } from '@osac/ui-components/api/v1/user';
 import { useTranslation } from '@osac/ui-components/hooks/useTranslation';
 import { getErrorMessage } from '@osac/ui-components/utils/error';
@@ -43,12 +42,20 @@ const ProjectMembershipCreatePage = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
-  const { mutateAsync: create, error: createErr } = useCreateProjectMembership();
-  const { mutateAsync: update, error: updateErr } = useUpdateProjectMembership();
+  const { mutateAsync: create, error: createErr } = useCreateResource(ProjectMemberships);
+  const { mutateAsync: update, error: updateErr } = useUpdateResource(ProjectMemberships);
 
-  const { data: project, isLoading: projectLoading, error: projectErr } = useProject(projectId);
+  const {
+    data: project,
+    isLoading: projectLoading,
+    error: projectErr,
+  } = useGetResource(Projects, { id: projectId }, { enabled: !!projectId });
   const { data: users = [], isLoading: usersLoading, error: usersError } = useUsers();
-  const { data: pm, isLoading: pmLoading, error: pmError } = useProjectMembership(pmId);
+  const {
+    data: pm,
+    isLoading: pmLoading,
+    error: pmError,
+  } = useGetResource(ProjectMemberships, { id: pmId }, { enabled: !!pmId });
 
   const roles = getRoleLabel(t);
 
@@ -76,6 +83,10 @@ const ProjectMembershipCreatePage = () => {
     );
   }
 
+  if (!project?.object) {
+    return <Alert variant="danger" isInline title={t('Failed to load project')} />;
+  }
+
   return (
     <>
       <PageSection hasBodyWrapper={false}>
@@ -88,7 +99,7 @@ const ProjectMembershipCreatePage = () => {
             </BreadcrumbItem>
             <BreadcrumbItem>
               <Button variant="link" isInline onClick={() => navigate(`/projects/${projectId}`)}>
-                {project && getProjectName(project, t)}
+                {project && getProjectName(project.object, t)}
               </Button>
             </BreadcrumbItem>
             <BreadcrumbItem isActive>
@@ -102,16 +113,24 @@ const ProjectMembershipCreatePage = () => {
       </PageSection>
       <PageSection hasBodyWrapper={false}>
         <Formik
-          initialValues={getInitialValues(pm)}
+          initialValues={getInitialValues(pm?.object)}
           validationSchema={getProjectMembershipValidationSchema(t)}
           onSubmit={async (values) => {
             try {
               if (pmId) {
-                await update({ id: pmId, body: getUpdateProjectMembershipPayload(values) });
+                await update({
+                  object: {
+                    id: pmId,
+                    ...getUpdateProjectMembershipPayload(values),
+                  },
+                });
               } else {
-                await create(
-                  getCreateProjectMembershipPayload(values, getFullProjectPath(project)),
-                );
+                await create({
+                  object: getCreateProjectMembershipPayload(
+                    values,
+                    getFullProjectPath(project.object),
+                  ),
+                });
               }
               navigate(`/projects/${projectId}`);
             } catch {

@@ -1,6 +1,7 @@
 import { Alert } from '@patternfly/react-core';
 
-import { useProjects } from '@osac/ui-components/api/v1/project';
+import { Projects } from '@osac/types';
+import { useListResource } from '@osac/ui-components/api/use-resource';
 import { useTranslation } from '@osac/ui-components/hooks/useTranslation';
 import { getErrorMessage } from '@osac/ui-components/utils/error';
 
@@ -13,14 +14,18 @@ interface ProjectFieldProps {
 
 const ProjectField = ({ label }: ProjectFieldProps) => {
   const { t } = useTranslation();
-  const { data: projects = [], isLoading, error } = useProjects();
+  const {
+    data: projects,
+    isLoading,
+    error,
+  } = useListResource(Projects, { filter: 'this.metadata.tenant != "shared"' });
   return (
     <>
       <SelectField
         fieldId="metadata.project"
         label={label || t('Project')}
         name="metadata.project"
-        options={projects.map((p) => ({
+        options={(projects?.items || []).map((p) => ({
           label: getProjectName(p, t),
           value: getFullProjectPath(p),
         }))}

@@ -763,11 +763,16 @@ export const createMockConnectTransport = (
       });
 
       router.service(Projects, {
-        list: () => ({
-          items: projects,
-          size: projects.length,
-          total: projects.length,
-        }),
+        list: (req) => {
+          const offset = req.offset ?? 0;
+          const limit = req.limit ?? projects.length;
+          const items = projects.slice(offset, offset + limit);
+          return {
+            items,
+            size: items.length,
+            total: projects.length,
+          };
+        },
         get: (req) => ({
           object: projects.find((p) => p.id === req.id),
         }),
