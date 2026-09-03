@@ -1,4 +1,5 @@
 import { create } from '@bufbuild/protobuf';
+import { Code, ConnectError } from '@connectrpc/connect';
 import { screen, waitFor } from '@testing-library/react';
 import { Formik } from 'formik';
 import { describe, expect, it } from 'vitest';
@@ -81,16 +82,44 @@ describe('VmConfigurationStep', () => {
     });
   });
 
-  it('renders empty state with create CTA when no disk images are available', async () => {
+  it('does not clear the selected disk image when the list request fails', async () => {
+    const values = createEmptyComputeInstanceValues();
+    values.spec.diskImage = 'di-1';
+    const seen: string[] = [];
+
+    renderWithProviders(
+      <Formik
+        initialValues={values}
+        onSubmit={() => undefined}
+      >
+        {({ values: formValues }) => {
+          seen.push(formValues.spec.diskImage);
+          return <VmConfigurationStep catalogItem={makeCatalogItem()} />;
+        }}
+      </Formik>,
+      {
+        transportOverrides: {
+          onDiskImageList: () => {
+            throw new ConnectError('disk image service unavailable', Code.Unavailable);
+          },
+        },
+      },
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText(/Could not load disk images/)).toBeInTheDocument();
+    });
+    expect(seen.at(-1)).toBe('di-1');
+    expect(screen.queryByText(/No disk images are available/)).not.toBeInTheDocument();
+  });
+
+  it('renders empty state without a create link when no disk images are available', async () => {
     renderStep([]);
 
     await waitFor(() => {
       expect(screen.getByText(/No disk images are available/)).toBeInTheDocument();
-      expect(screen.getByRole('link', { name: /Go to Disk Images/ })).toHaveAttribute(
-        'href',
-        '/admin/infrastructure/disk-images/create',
-      );
     });
+    expect(screen.queryByRole('link', { name: /Go to Disk Images/ })).not.toBeInTheDocument();
   });
 
   it('appends (deprecated) suffix to deprecated disk image label', async () => {

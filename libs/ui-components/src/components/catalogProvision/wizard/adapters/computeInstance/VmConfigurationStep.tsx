@@ -1,5 +1,4 @@
 import { useEffect, useMemo } from 'react';
-import { Link } from 'react-router-dom';
 import {
   Alert,
   Button,
@@ -107,12 +106,13 @@ export const VmConfigurationStep = ({ catalogItem }: Props) => {
   useEffect(() => {
     if (
       !diskImagesLoading &&
+      !diskImagesError &&
       diskImageField.value &&
       !diskImages.find((di) => di.id === diskImageField.value)
     ) {
       void setFieldValue('spec.diskImage', '');
     }
-  }, [diskImagesLoading, diskImages, diskImageField.value, setFieldValue]);
+  }, [diskImagesLoading, diskImagesError, diskImages, diskImageField.value, setFieldValue]);
 
   const overlays = useMemo(
     () => ({
@@ -159,14 +159,6 @@ export const VmConfigurationStep = ({ catalogItem }: Props) => {
         <StackItem>
           <EmptyState>
             <EmptyStateBody>{t('catalogProvision.diskImages.emptyStateBody')}</EmptyStateBody>
-            <Button
-              variant="link"
-              component={(props: React.ComponentPropsWithRef<'a'>) => (
-                <Link {...(props as object)} to="/admin/infrastructure/disk-images/create" />
-              )}
-            >
-              {t('catalogProvision.diskImages.createCTA')}
-            </Button>
           </EmptyState>
         </StackItem>
       ) : null}

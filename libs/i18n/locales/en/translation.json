@@ -92,7 +92,6 @@
   "catalogProvision.catalog.searchAria": "Search catalog items",
   "catalogProvision.catalog.searchPlaceholder": "Search catalog items…",
   "catalogProvision.common.loading": "Loading...",
-  "catalogProvision.diskImages.createCTA": "Go to Disk Images",
   "catalogProvision.diskImages.deprecatedWarning": "The selected disk image is deprecated and may be removed in a future release.",
   "catalogProvision.diskImages.emptyStateBody": "No disk images are available. Ask an administrator to create a disk image first.",
   "catalogProvision.diskImages.loadError": "Could not load disk images",
