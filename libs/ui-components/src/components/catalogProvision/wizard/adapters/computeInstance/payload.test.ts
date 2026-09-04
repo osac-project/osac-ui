@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import type { ComputeInstanceCatalogItem } from '@osac/types';
+import { type ComputeInstanceCatalogItem, ComputeInstanceRunStrategy } from '@osac/types';
 
 import { buildComputeInstanceCreatePayload, createEmptyComputeInstanceValues } from './payload';
 
@@ -53,7 +53,6 @@ const buildValues = (project: string) => ({
   spec: {
     ...createEmptyComputeInstanceValues().spec,
     instanceType: 'standard-4-8',
-    image: { sourceRef: 'quay.io/example/rhel9' },
     networking: {
       virtualNetwork: 'vnet-1',
       subnet: 'subnet-1',
@@ -70,7 +69,6 @@ const baseValues = () => {
     metadata: { name: 'web-01', project: '' },
     spec: {
       ...values.spec,
-      image: { sourceRef: 'quay.io/example/rhel9' },
       instanceType: 'standard-4-8',
       networking: { virtualNetwork: 'vnet', subnet: 'subnet-1', securityGroups: ['sg-1'] },
     },
@@ -84,8 +82,7 @@ describe('buildComputeInstanceCreatePayload', () => {
       spec: {
         catalogItem: { id: vmCatalogItem.id },
         instanceType: { id: 'standard-4-8' },
-        image: { sourceType: 'registry', sourceRef: 'quay.io/example/rhel9' },
-        runStrategy: 'Always',
+        runStrategy: ComputeInstanceRunStrategy.COMPUTE_INSTANCE_RUN_STRATEGY_ALWAYS,
         networkAttachments: [
           {
             subnet: { id: 'subnet-1' },

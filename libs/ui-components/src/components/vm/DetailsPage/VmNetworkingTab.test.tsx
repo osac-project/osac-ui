@@ -32,7 +32,6 @@ describe('VmNetworkingTab', () => {
       isInstanceTypeLoading: false,
       fieldLabels: {
         sshPublicKey: '',
-        image: '',
         bootDisk: '',
         userData: '',
       },
@@ -71,7 +70,6 @@ describe('VmNetworkingTab', () => {
       isInstanceTypeLoading: false,
       fieldLabels: {
         sshPublicKey: '',
-        image: '',
         bootDisk: '',
         userData: '',
       },
