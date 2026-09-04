@@ -172,12 +172,6 @@ export const VmReviewStep = ({ catalogItem }: Props) => {
               {formatReviewScalar(values.spec.sshPublicKey)}
             </DescriptionListDescription>
           </DescriptionListGroup>
-          <DescriptionListGroup>
-            <DescriptionListTerm>{t('VM image')}</DescriptionListTerm>
-            <DescriptionListDescription>
-              {formatReviewScalar(values.spec.image.sourceRef)}
-            </DescriptionListDescription>
-          </DescriptionListGroup>
 
           <DescriptionListGroup>
             <DescriptionListTerm>{t('Instance type')}</DescriptionListTerm>

@@ -1,6 +1,3 @@
-/** VMs are always created in the running state; stop/start is handled on the details page. */
-export const VM_CREATE_RUN_STRATEGY = 'Always' as const;
-
 export interface ComputeInstanceNetworkingValues {
   virtualNetwork: string;
   subnet: string;
@@ -21,9 +18,6 @@ export interface ComputeInstanceWizardValues {
   };
   spec: {
     sshPublicKey: string;
-    image: {
-      sourceRef: string;
-    };
     instanceType: string;
     userData: string;
     bootDisk: ComputeInstanceDiskValues;
@@ -37,7 +31,6 @@ export const VM_SSH_KEY_FORM_PATH = 'spec.sshPublicKey';
 export const vmSshPublicKeyWirePath = VM_SSH_KEY_WIRE_PATH;
 
 export const CONFIGURATION_CATALOG_PATHS = [
-  'spec.image.source_ref',
   'spec.user_data',
   'spec.boot_disk.size_gib',
   'spec.boot_disk.storage_tier',

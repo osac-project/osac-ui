@@ -1,11 +1,16 @@
 import { create } from '@bufbuild/protobuf';
 import type { Transport } from '@connectrpc/connect';
 import type { RenderOptions } from '@testing-library/react';
-import { fireEvent, screen, waitFor, within } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import { UserEvent } from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
-import type { ClusterCatalogItem, ComputeInstanceCatalogItem } from '@osac/types';
+import {
+  type ClusterCatalogItem,
+  type ComputeInstanceCatalogItem,
+  ComputeInstanceRunStrategy,
+  type Secret,
+} from '@osac/types';
 import {
   ClusterTemplateReferenceSchema,
   ComputeInstanceTemplateReferenceSchema,
@@ -27,16 +32,12 @@ import type {
 import { createMockConnectTransport } from '../../test-utils/createMockConnectTransport';
 import { renderWithProviders } from '../../test-utils/TestProviders';
 
-const fillClusterGeneralStep = async (
-  user: UserEvent,
-  name: string,
-  pullSecret = '{"auths":{}}',
-) => {
+const fillClusterGeneralStep = async (user: UserEvent, name: string) => {
   const nameInput = screen.getByLabelText(/^Name/);
   await user.clear(nameInput);
   await user.type(nameInput, name);
-  const pullSecretInput = screen.getByLabelText(/Pull secret/);
-  fireEvent.change(pullSecretInput, { target: { value: pullSecret } });
+  await user.click(screen.getByLabelText(/Pull secret secret/));
+  await user.click(screen.getByRole('option', { name: 'pull-secret' }));
 };
 
 const fillGeneralStep = async (user: UserEvent, name: string) => {
@@ -111,7 +112,7 @@ const advanceToConfigurationStep = async (
   await fillGeneralStep(user, vmName);
   await clickWizardNext(user);
   await waitFor(() => {
-    expect(screen.getByLabelText(/VM image/)).toBeInTheDocument();
+    expect(screen.getByLabelText(/^Instance type/)).toBeInTheDocument();
   });
 };
 
@@ -347,6 +348,25 @@ const multiFieldCatalogItem: ComputeInstanceCatalogItem = {
 };
 
 const apiFixtures: MockApiFixtures = {
+  secrets: [
+    {
+      $typeName: 'osac.public.v1.Secret',
+      id: 'pull-secret-id',
+      metadata: {
+        $typeName: 'osac.public.v1.Metadata',
+        displayName: '',
+        description: '',
+        annotations: {},
+        creator: '',
+        labels: {},
+        name: 'pull-secret',
+        project: '',
+        tenant: '',
+        version: 1,
+      },
+      data: {},
+    } as Secret,
+  ],
   catalogItems: [vmCatalogItem],
   clusterCatalogItems: [clusterCatalogItem],
   clusterTemplates: [
@@ -553,7 +573,7 @@ const renderWizard = (options: RenderWizardOptions = {}) => {
 
 const expectConfigurationDefaults = async () => {
   await waitFor(() => {
-    expect(screen.getByLabelText(/VM image/)).toHaveValue('quay.io/example/rhel9');
+    expect(screen.getByLabelText(/^Instance type/)).toBeInTheDocument();
   });
 };
 
@@ -631,8 +651,7 @@ describe('CatalogProvisionWizard', () => {
 
     expect(onProvision.mock.calls[0][0]).toMatchObject({
       spec: {
-        image: { sourceRef: 'quay.io/example/rhel9' },
-        runStrategy: 'Always',
+        runStrategy: ComputeInstanceRunStrategy.COMPUTE_INSTANCE_RUN_STRATEGY_ALWAYS,
         instanceType: { id: 'standard-4-8' },
         bootDisk: { sizeGib: 40 },
       },
@@ -672,7 +691,7 @@ describe('CatalogProvisionWizard', () => {
 
     releaseCatalogFetch();
     await waitFor(() => {
-      expect(screen.getByLabelText(/VM image/)).toBeInTheDocument();
+      expect(screen.getByLabelText(/^Instance type/)).toBeInTheDocument();
     });
 
     await expectConfigurationDefaults();
@@ -699,7 +718,6 @@ describe('CatalogProvisionWizard', () => {
     expect(nameInput).toHaveAttribute('aria-describedby', 'metadata-name-helper-error');
 
     expect(screen.getByLabelText(/^Name/)).toBeInTheDocument();
-    expect(screen.queryByLabelText(/VM image/)).not.toBeInTheDocument();
   });
 
   it('closes immediately on Cancel when the wizard is pristine', async () => {
@@ -779,7 +797,7 @@ describe('CatalogProvisionWizard', () => {
     await clickWizardBack(user);
 
     await waitFor(() => {
-      expect(screen.getByLabelText(/VM image/)).toHaveValue('quay.io/example/rhel9');
+      expect(screen.getByLabelText(/^Instance type/)).toBeInTheDocument();
     });
   });
 
@@ -1014,10 +1032,7 @@ describe('CatalogProvisionWizard', () => {
 
     expect(onProvision.mock.calls[0][0]).toMatchObject({
       metadata: { name: 'web-01' },
-      spec: {
-        image: { sourceRef: 'quay.io/example/rhel9' },
-        instanceType: { id: 'standard-4-8' },
-      },
+      spec: { instanceType: { id: 'standard-4-8' } },
     });
     expect(onProvision.mock.calls[0][0]).not.toHaveProperty('spec.cores');
     expect(onProvision.mock.calls[0][0]).not.toHaveProperty('spec.memoryGib');
@@ -1055,7 +1070,6 @@ describe('CatalogProvisionWizard', () => {
     const { user } = renderWizard();
 
     await advanceToConfigurationStep(user, 'web-01', vmCatalogItem.title);
-    expect(screen.getByLabelText(/VM image/)).toBeInTheDocument();
     expect(screen.queryByLabelText(/Boot disk/)).not.toBeInTheDocument();
 
     await waitForConfigurationReady();
@@ -1065,7 +1079,6 @@ describe('CatalogProvisionWizard', () => {
       expect(screen.getByLabelText(/Boot disk/)).toBeInTheDocument();
     });
     expect(screen.getByText('Storage tier')).toBeInTheDocument();
-    expect(screen.queryByLabelText(/VM image/)).not.toBeInTheDocument();
   });
 
   it('blocks Next on the Storage step until the boot disk size is valid', async () => {
