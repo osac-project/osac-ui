@@ -17,6 +17,7 @@ export interface SelectFieldOption {
   value: string | number;
   label: string;
   isDisabled?: boolean;
+  description?: React.ReactNode;
 }
 
 interface SelectFieldProps {
@@ -106,7 +107,12 @@ export const SelectField = ({
       >
         <SelectList>
           {options.map((option) => (
-            <SelectOption key={option.value} value={option.value} isDisabled={option.isDisabled}>
+            <SelectOption
+              key={option.value}
+              value={option.value}
+              isDisabled={option.isDisabled}
+              description={option.description}
+            >
               {option.label}
             </SelectOption>
           ))}
