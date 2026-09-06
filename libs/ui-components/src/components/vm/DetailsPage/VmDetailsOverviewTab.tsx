@@ -2,7 +2,9 @@ import { Card, CardBody, CardTitle, Grid, GridItem } from '@patternfly/react-cor
 
 import type { ComputeInstance } from '@osac/types';
 
+import { useVmStorageDisplay } from './useVmStorageDisplay';
 import VmDetailsCard from './VmDetailsCard';
+import VmStorageCard from './VmStorageCard';
 import VmUserDataCard from './VmUserDataCard';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { ResourceConditionsTable } from '../../Resource/ResourceConditionsTable';
@@ -13,12 +15,13 @@ interface Props {
 
 const VmDetailsOverviewTab = ({ vm }: Props) => {
   const { t } = useTranslation();
+  const { storageRows } = useVmStorageDisplay(vm);
   const conditions = vm.status?.conditions ?? [];
 
   return (
     <Grid hasGutter>
       <GridItem md={6}>
-        <VmDetailsCard vm={vm} />
+        <VmDetailsCard vm={vm} storageRows={storageRows} />
       </GridItem>
       <GridItem md={6}>
         <Card isFullHeight>
@@ -31,6 +34,9 @@ const VmDetailsOverviewTab = ({ vm }: Props) => {
             />
           </CardBody>
         </Card>
+      </GridItem>
+      <GridItem span={12}>
+        <VmStorageCard storageRows={storageRows} />
       </GridItem>
       <GridItem span={12}>
         <VmUserDataCard vm={vm} />
