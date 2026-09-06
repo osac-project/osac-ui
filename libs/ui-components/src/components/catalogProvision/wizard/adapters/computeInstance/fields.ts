@@ -16,6 +16,11 @@ export interface ComputeInstanceDiskValues {
   storageTier: string;
 }
 
+export interface ComputeInstanceDiskImageValues {
+  id: string;
+  name: string;
+}
+
 export interface ComputeInstanceWizardValues {
   catalogItemId: string;
   metadata: {
@@ -24,7 +29,7 @@ export interface ComputeInstanceWizardValues {
   };
   spec: {
     sshPublicKey: string;
-    diskImage: string;
+    diskImage: ComputeInstanceDiskImageValues;
     instanceType: string;
     userData: string;
     bootDisk: ComputeInstanceDiskValues;

@@ -58,7 +58,8 @@ export const VmConfigurationStep = ({ catalogItem }: Props) => {
     refetch: refetchDiskImages,
   } = useDiskImages();
 
-  const [diskImageField] = useField<string>('spec.diskImage');
+  const [diskImageField] = useField<string>('spec.diskImage.id');
+  const [diskImageNameField] = useField<string>('spec.diskImage.name');
   const { setFieldValue } = useFormikContext();
 
   const selectedDiskImage = useMemo(
@@ -110,9 +111,19 @@ export const VmConfigurationStep = ({ catalogItem }: Props) => {
       diskImageField.value &&
       !diskImages.find((di) => di.id === diskImageField.value)
     ) {
-      void setFieldValue('spec.diskImage', '');
+      void setFieldValue('spec.diskImage', { id: '', name: '' });
     }
   }, [diskImagesLoading, diskImagesError, diskImages, diskImageField.value, setFieldValue]);
+
+  useEffect(() => {
+    if (!selectedDiskImage) {
+      return;
+    }
+    const name = resourceDisplayName(selectedDiskImage.metadata, selectedDiskImage.id);
+    if (diskImageNameField.value !== name) {
+      void setFieldValue('spec.diskImage.name', name);
+    }
+  }, [selectedDiskImage, diskImageNameField.value, setFieldValue]);
 
   const overlays = useMemo(
     () => ({
@@ -174,7 +185,7 @@ export const VmConfigurationStep = ({ catalogItem }: Props) => {
       <StackItem>
         <OsacForm>
           <SelectField
-            name="spec.diskImage"
+            name="spec.diskImage.id"
             label={overlays.diskImage.label}
             fieldId="vm-disk-image"
             isRequired

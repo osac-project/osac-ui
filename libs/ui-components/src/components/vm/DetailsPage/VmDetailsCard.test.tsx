@@ -6,8 +6,6 @@ import {
   ComputeInstance,
   ComputeInstanceCatalogItemReferenceSchema,
   ComputeInstanceTemplateReferenceSchema,
-  DiskImage,
-  DiskImageLifecycle,
   DiskImageReferenceSchema,
   InstanceTypeReferenceSchema,
   InstanceTypeState,
@@ -25,31 +23,6 @@ vi.mock('./VmDetailsCatalogValue', () => ({
 }));
 
 const { useVmDetailsDisplay } = await import('./useVmDetailsDisplay');
-
-const rhel9Image: DiskImage = {
-  $typeName: 'osac.public.v1.DiskImage',
-  id: 'rhel9-image-id',
-  metadata: {
-    $typeName: 'osac.public.v1.Metadata',
-    name: 'RHEL 9',
-    displayName: '',
-    description: '',
-    creator: 'admin',
-    labels: {},
-    annotations: {},
-    project: '',
-    tenant: '',
-    version: 1,
-  },
-  spec: {
-    $typeName: 'osac.public.v1.DiskImageSpec',
-    lifecycle: DiskImageLifecycle.AVAILABLE,
-    architecture: [],
-    guestOsFamily: 0,
-    sourceRef: '',
-    sourceType: 0,
-  } as unknown as DiskImage['spec'],
-} as unknown as DiskImage;
 
 const catalogVm: ComputeInstance = {
   $typeName: 'osac.public.v1.ComputeInstance',
@@ -75,7 +48,7 @@ const catalogVm: ComputeInstance = {
     $typeName: 'osac.public.v1.ComputeInstanceSpec',
     catalogItem: create(ComputeInstanceCatalogItemReferenceSchema, { id: 'catalog-rhel-9' }),
     sshPublicKey: 'ssh-rsa AAAA...',
-    diskImage: create(DiskImageReferenceSchema, { id: 'rhel9-image-id' }),
+    diskImage: create(DiskImageReferenceSchema, { id: 'rhel9-image-id', name: 'RHEL 9' }),
     instanceType: create(InstanceTypeReferenceSchema, { id: 'standard-4-8' }),
     bootDisk: {
       $typeName: 'osac.public.v1.ComputeInstanceDisk',
@@ -91,12 +64,10 @@ const catalogVm: ComputeInstance = {
 };
 
 const renderCard = (vm: ComputeInstance = catalogVm) =>
-  renderWithProviders(<VmDetailsCard vm={vm} />, {
-    apiFixtures: { diskImages: [rhel9Image] },
-  });
+  renderWithProviders(<VmDetailsCard vm={vm} />);
 
 describe('VmDetailsCard', () => {
-  it('shows catalog fields with full SSH key', async () => {
+  it('shows catalog fields with full SSH key', () => {
     vi.mocked(useVmDetailsDisplay).mockReturnValue({
       catalogItemId: 'catalog-rhel-9',
       hasCatalogItem: true,
@@ -151,8 +122,7 @@ describe('VmDetailsCard', () => {
     expect(screen.queryByText('Version')).not.toBeInTheDocument();
     expect(screen.queryByText('Creators')).not.toBeInTheDocument();
     expect(screen.getByText('Creator')).toBeInTheDocument();
-    // disk image name resolves via useDiskImage lookup
-    await screen.findByText('RHEL 9');
+    expect(screen.getByText('RHEL 9')).toBeInTheDocument();
   });
 
   it('shows degraded message when catalog item is missing', () => {

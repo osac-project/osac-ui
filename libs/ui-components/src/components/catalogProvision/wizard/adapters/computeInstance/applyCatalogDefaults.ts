@@ -71,7 +71,7 @@ export const applyVmCatalogConfigurationDefaults = (
     t('Additional disks'),
   );
 
-  setDefault(helpers, 'spec.diskImage', overlayDefaultToFormValue(diskImageOverlay));
+  setDefault(helpers, 'spec.diskImage.id', overlayDefaultToFormValue(diskImageOverlay));
   setDefault(helpers, 'spec.userData', overlayDefaultToFormValue(userDataOverlay));
   setDefault(helpers, 'spec.bootDisk.sizeGib', overlayDefaultToFormValue(bootDiskOverlay) ?? '');
   setDefault(helpers, 'spec.bootDisk.storageTier', overlayDefaultToFormValue(storageTierOverlay));

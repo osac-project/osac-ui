@@ -53,7 +53,7 @@ const buildValues = (project: string) => ({
   spec: {
     ...createEmptyComputeInstanceValues().spec,
     instanceType: 'standard-4-8',
-    diskImage: 'di-rhel9',
+    diskImage: { id: 'di-rhel9', name: '' },
     networking: {
       virtualNetwork: 'vnet-1',
       subnet: 'subnet-1',
@@ -70,7 +70,7 @@ const baseValues = () => {
     metadata: { name: 'web-01', project: '' },
     spec: {
       ...values.spec,
-      diskImage: 'di-rhel9',
+      diskImage: { id: 'di-rhel9', name: '' },
       instanceType: 'standard-4-8',
       networking: { virtualNetwork: 'vnet', subnet: 'subnet-1', securityGroups: ['sg-1'] },
     },

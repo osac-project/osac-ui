@@ -59,4 +59,11 @@ describe('VmReviewStep — Storage section', () => {
     // "Boot disk" label appears exactly once — inside the Storage section, not Configuration.
     expect(screen.getAllByText('Boot disk')).toHaveLength(1);
   });
+
+  it('shows the disk image name from spec without fetching the resource', async () => {
+    renderReviewStep({ diskImage: { id: 'di-rhel9', name: 'rhel9' } });
+
+    expect(await screen.findByText('rhel9')).toBeInTheDocument();
+    expect(screen.queryByText('di-rhel9')).not.toBeInTheDocument();
+  });
 });

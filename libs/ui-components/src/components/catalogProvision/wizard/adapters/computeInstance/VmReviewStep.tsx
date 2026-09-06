@@ -14,10 +14,8 @@ import { useFormikContext } from 'formik';
 
 import { type SecurityGroup } from '@osac/types';
 import { cel } from '@osac/ui-components/api/cel';
-import { useDiskImage } from '@osac/ui-components/api/v1/disk-image';
 import { useInstanceType } from '@osac/ui-components/api/v1/instance-types';
 import {
-  resourceDisplayName,
   useSecurityGroups,
   useSubnet,
   useVirtualNetwork,
@@ -55,12 +53,6 @@ export const VmReviewStep = ({ catalogItem }: Props) => {
   } = useInstanceType(values.spec.instanceType);
 
   const {
-    data: diskImage,
-    isLoading: diskImageLoading,
-    error: diskImageErr,
-  } = useDiskImage(values.spec.diskImage || undefined);
-
-  const {
     data: virtualNetwork,
     isLoading: virtNetLoading,
     error: virtNetErr,
@@ -92,7 +84,6 @@ export const VmReviewStep = ({ catalogItem }: Props) => {
 
   if (
     instanceLoading ||
-    diskImageLoading ||
     virtNetLoading ||
     subnetLoading ||
     scLoading ||
@@ -112,13 +103,6 @@ export const VmReviewStep = ({ catalogItem }: Props) => {
         <StackItem>
           <Alert variant="warning" isInline title={t('Failed to fetch instance type')}>
             {getErrorMessage(instanceErr)}
-          </Alert>
-        </StackItem>
-      )}
-      {!!diskImageErr && (
-        <StackItem>
-          <Alert variant="warning" isInline title={t('Failed to fetch disk image')}>
-            {getErrorMessage(diskImageErr)}
           </Alert>
         </StackItem>
       )}
@@ -191,7 +175,7 @@ export const VmReviewStep = ({ catalogItem }: Props) => {
           <DescriptionListGroup>
             <DescriptionListTerm>{t('Disk image')}</DescriptionListTerm>
             <DescriptionListDescription>
-              {resourceDisplayName(diskImage?.metadata, values.spec.diskImage)}
+              {formatReviewScalar(values.spec.diskImage.name || values.spec.diskImage.id)}
             </DescriptionListDescription>
           </DescriptionListGroup>
 

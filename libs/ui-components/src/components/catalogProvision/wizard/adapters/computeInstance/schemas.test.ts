@@ -51,7 +51,7 @@ const emptyValues: ComputeInstanceWizardValues = {
   metadata: { name: '', project: '' },
   spec: {
     sshPublicKey: '',
-    diskImage: '',
+    diskImage: { id: '', name: '' },
     instanceType: '',
     userData: '',
     bootDisk: { sizeGib: '', storageTier: '' },
@@ -165,7 +165,7 @@ describe('buildComputeInstanceStepSchema', () => {
         metadata: { name: 'web-01', project: '' },
         spec: {
           ...emptyValues.spec,
-          diskImage: 'di-rhel9',
+          diskImage: { id: 'di-rhel9', name: '' },
           instanceType: 'standard-4-8',
           bootDisk: { sizeGib: 'not-a-number', storageTier: '' },
         },
@@ -201,7 +201,7 @@ describe('buildComputeInstanceStepSchema', () => {
         metadata: { name: 'web-01', project: '' },
         spec: {
           ...emptyValues.spec,
-          diskImage: 'di-rhel9',
+          diskImage: { id: 'di-rhel9', name: '' },
         },
       },
       vmCatalogItem,
@@ -226,7 +226,7 @@ describe('buildComputeInstanceStepSchema', () => {
         metadata: { name: 'web-01', project: '' },
         spec: {
           ...emptyValues.spec,
-          diskImage: 'di-rhel9',
+          diskImage: { id: 'di-rhel9', name: '' },
         },
       },
       vmCatalogItem,
@@ -254,7 +254,9 @@ describe('buildComputeInstanceStepSchema', () => {
     );
     expect(errors).toEqual({
       spec: {
-        diskImage: 'catalogProvision.validation.diskImageRequired',
+        diskImage: {
+          id: 'catalogProvision.validation.diskImageRequired',
+        },
       },
     });
   });
@@ -268,7 +270,7 @@ describe('buildComputeInstanceStepSchema', () => {
         metadata: { name: 'web-01', project: '' },
         spec: {
           ...emptyValues.spec,
-          diskImage: 'di-rhel9',
+          diskImage: { id: 'di-rhel9', name: '' },
           instanceType: 'standard-4-8',
         },
       },
@@ -383,7 +385,7 @@ describe('buildComputeInstanceStepSchema', () => {
         metadata: { name: 'web-01', project: '' },
         spec: {
           ...emptyValues.spec,
-          diskImage: 'di-rhel9',
+          diskImage: { id: 'di-rhel9', name: '' },
           instanceType: 'standard-4-8',
           additionalDisks: [{ sizeGib: '100', storageTier: '' }],
         },

@@ -84,16 +84,13 @@ describe('VmConfigurationStep', () => {
 
   it('does not clear the selected disk image when the list request fails', async () => {
     const values = createEmptyComputeInstanceValues();
-    values.spec.diskImage = 'di-1';
+    values.spec.diskImage = { id: 'di-1', name: '' };
     const seen: string[] = [];
 
     renderWithProviders(
-      <Formik
-        initialValues={values}
-        onSubmit={() => undefined}
-      >
+      <Formik initialValues={values} onSubmit={() => undefined}>
         {({ values: formValues }) => {
-          seen.push(formValues.spec.diskImage);
+          seen.push(formValues.spec.diskImage.id);
           return <VmConfigurationStep catalogItem={makeCatalogItem()} />;
         }}
       </Formik>,
