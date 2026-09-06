@@ -4,6 +4,7 @@ import type { TFunction } from 'i18next';
 import type { ComputeInstanceCatalogItem } from '@osac/types';
 
 import type { ComputeInstanceDiskValues, ComputeInstanceWizardValues } from './fields';
+import { VM_DISK_IMAGE_WIRE_PATH } from './fields';
 import { fieldDefinitionDefaultToInputString } from '../../../catalogFieldDefinition';
 import {
   getCatalogFieldOverlay,
@@ -44,10 +45,10 @@ export const applyVmCatalogConfigurationDefaults = (
 ): void => {
   const definitions = readCatalogFieldDefinitions(catalogItem);
 
-  const imageOverlay = getCatalogFieldOverlay(
-    'spec.image.source_ref',
+  const diskImageOverlay = getCatalogFieldOverlay(
+    VM_DISK_IMAGE_WIRE_PATH,
     definitions,
-    t('catalogProvision.vm.fields.image'),
+    t('catalogProvision.vm.fields.diskImage'),
   );
   const userDataOverlay = getCatalogFieldOverlay(
     'spec.user_data',
@@ -70,7 +71,7 @@ export const applyVmCatalogConfigurationDefaults = (
     t('Additional disks'),
   );
 
-  setDefault(helpers, 'spec.image.sourceRef', overlayDefaultToFormValue(imageOverlay));
+  setDefault(helpers, 'spec.diskImage.id', overlayDefaultToFormValue(diskImageOverlay));
   setDefault(helpers, 'spec.userData', overlayDefaultToFormValue(userDataOverlay));
   setDefault(helpers, 'spec.bootDisk.sizeGib', overlayDefaultToFormValue(bootDiskOverlay) ?? '');
   setDefault(helpers, 'spec.bootDisk.storageTier', overlayDefaultToFormValue(storageTierOverlay));

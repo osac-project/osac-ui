@@ -11,7 +11,7 @@ export const createEmptyComputeInstanceValues = (): ComputeInstanceWizardValues 
   metadata: { name: '', project: '' },
   spec: {
     sshPublicKey: '',
-    image: { sourceRef: '' },
+    diskImage: { id: '', name: '' },
     instanceType: '',
     userData: '',
     bootDisk: { sizeGib: '', storageTier: '' },
@@ -32,16 +32,15 @@ export const buildComputeInstanceCreatePayload = (
   values: ComputeInstanceWizardValues,
   catalogItem: ComputeInstanceCatalogItem,
 ): MessageInitShape<typeof ComputeInstanceSchema> => {
-  const spec: MessageInitShape<typeof ComputeInstanceSchema>['spec'] = {
+  const spec: NonNullable<MessageInitShape<typeof ComputeInstanceSchema>['spec']> = {
     catalogItem: {
       id: catalogItem.id,
     },
     instanceType: {
       id: values.spec.instanceType,
     },
-    image: {
-      sourceType: 'registry',
-      sourceRef: values.spec.image.sourceRef.trim(),
+    diskImage: {
+      id: values.spec.diskImage.id,
     },
     runStrategy: VM_CREATE_RUN_STRATEGY,
     networkAttachments: [

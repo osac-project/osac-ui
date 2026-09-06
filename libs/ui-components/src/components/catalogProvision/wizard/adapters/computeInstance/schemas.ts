@@ -4,6 +4,7 @@ import * as yup from 'yup';
 import { resourceNameSchema } from '@osac/ui-components/validation/resource-name';
 import { userDataSchema } from '@osac/ui-components/validation/user-data';
 
+import { VM_DISK_IMAGE_WIRE_PATH } from './fields';
 import {
   getCatalogFieldOverlay,
   hasCatalogFieldDefinition,
@@ -16,10 +17,10 @@ import type { WizardStepId } from '../../stepIds';
 const buildComputeInstanceFieldDefinitions = (catalogItem: unknown, t: TFunction) => {
   const definitions = readCatalogFieldDefinitions(catalogItem);
 
-  const imageOverlay = getCatalogFieldOverlay(
-    'spec.image.source_ref',
+  const diskImageOverlay = getCatalogFieldOverlay(
+    VM_DISK_IMAGE_WIRE_PATH,
     definitions,
-    t('catalogProvision.vm.fields.image'),
+    t('catalogProvision.vm.fields.diskImage'),
   );
   const userDataOverlay = getCatalogFieldOverlay(
     'spec.user_data',
@@ -52,14 +53,12 @@ const buildComputeInstanceFieldDefinitions = (catalogItem: unknown, t: TFunction
       sshKeyRequired,
       t('catalogProvision.validation.required'),
     ),
-    specImage: yup.object({
-      sourceRef: mergeCatalogValidation(
-        yup.string().trim(),
-        imageOverlay,
-        true,
-        t('catalogProvision.validation.imageRequired'),
-      ),
-    }),
+    specDiskImage: mergeCatalogValidation(
+      yup.string().required(t('catalogProvision.validation.diskImageRequired')),
+      diskImageOverlay,
+      true,
+      t('catalogProvision.validation.diskImageRequired'),
+    ),
     specInstanceType: yup.string().required(t('catalogProvision.validation.instanceTypeRequired')),
     specUserData: mergeCatalogValidation(
       userDataSchema(t),
@@ -139,7 +138,9 @@ export const buildComputeInstanceStepSchema = (
     case 'configuration':
       return yup.object({
         spec: yup.object({
-          image: fields.specImage,
+          diskImage: yup.object({
+            id: fields.specDiskImage,
+          }),
           instanceType: fields.specInstanceType,
           userData: fields.specUserData,
         }),

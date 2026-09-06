@@ -77,7 +77,7 @@ const VmDetailsCard = ({ vm }: Props) => {
               <DescriptionListGroup>
                 <DescriptionListTerm>{fieldLabels.image}</DescriptionListTerm>
                 <DescriptionListDescription>
-                  {displayValue(vm.spec?.image?.sourceRef)}
+                  {displayValue(vm.spec?.diskImage?.name || vm.spec?.diskImage?.id)}
                 </DescriptionListDescription>
               </DescriptionListGroup>
               <DescriptionListGroup>

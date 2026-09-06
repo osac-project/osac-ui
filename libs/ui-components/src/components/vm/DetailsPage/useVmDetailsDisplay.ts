@@ -13,6 +13,7 @@ import {
 } from '../../../api/v1/networking';
 import { useStorageTiers } from '../../../api/v1/storage-tiers';
 import { useTranslation } from '../../../hooks/useTranslation';
+import { VM_DISK_IMAGE_WIRE_PATH } from '../../catalogProvision/wizard/adapters/computeInstance/fields';
 import {
   getCatalogFieldOverlay,
   readCatalogFieldDefinitions,
@@ -46,9 +47,9 @@ export const useVmDetailsDisplay = (vm: ComputeInstance) => {
   const fieldLabels = useMemo(() => {
     const definitions = catalogItem ? readCatalogFieldDefinitions(catalogItem) : [];
     const imageOverlay = getCatalogFieldOverlay(
-      'spec.image.source_ref',
+      VM_DISK_IMAGE_WIRE_PATH,
       definitions,
-      t('catalogProvision.vm.fields.image'),
+      t('catalogProvision.vm.fields.diskImage'),
     );
     const userDataOverlay = getCatalogFieldOverlay(
       'spec.user_data',

@@ -6,6 +6,7 @@ import {
   ComputeInstance,
   ComputeInstanceCatalogItemReferenceSchema,
   ComputeInstanceTemplateReferenceSchema,
+  DiskImageReferenceSchema,
   InstanceTypeReferenceSchema,
   InstanceTypeState,
 } from '@osac/types';
@@ -47,11 +48,7 @@ const catalogVm: ComputeInstance = {
     $typeName: 'osac.public.v1.ComputeInstanceSpec',
     catalogItem: create(ComputeInstanceCatalogItemReferenceSchema, { id: 'catalog-rhel-9' }),
     sshPublicKey: 'ssh-rsa AAAA...',
-    image: {
-      $typeName: 'osac.public.v1.ComputeInstanceImage',
-      sourceRef: 'quay.io/example/rhel9',
-      sourceType: '',
-    },
+    diskImage: create(DiskImageReferenceSchema, { id: 'rhel9-image-id', name: 'RHEL 9' }),
     instanceType: create(InstanceTypeReferenceSchema, { id: 'standard-4-8' }),
     bootDisk: {
       $typeName: 'osac.public.v1.ComputeInstanceDisk',
@@ -125,6 +122,7 @@ describe('VmDetailsCard', () => {
     expect(screen.queryByText('Version')).not.toBeInTheDocument();
     expect(screen.queryByText('Creators')).not.toBeInTheDocument();
     expect(screen.getByText('Creator')).toBeInTheDocument();
+    expect(screen.getByText('RHEL 9')).toBeInTheDocument();
   });
 
   it('shows degraded message when catalog item is missing', () => {

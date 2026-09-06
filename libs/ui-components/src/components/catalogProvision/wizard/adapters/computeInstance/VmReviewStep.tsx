@@ -173,9 +173,9 @@ export const VmReviewStep = ({ catalogItem }: Props) => {
             </DescriptionListDescription>
           </DescriptionListGroup>
           <DescriptionListGroup>
-            <DescriptionListTerm>{t('VM image')}</DescriptionListTerm>
+            <DescriptionListTerm>{t('Disk image')}</DescriptionListTerm>
             <DescriptionListDescription>
-              {formatReviewScalar(values.spec.image.sourceRef)}
+              {formatReviewScalar(values.spec.diskImage.name || values.spec.diskImage.id)}
             </DescriptionListDescription>
           </DescriptionListGroup>
 
