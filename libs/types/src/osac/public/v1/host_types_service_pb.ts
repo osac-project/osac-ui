@@ -288,7 +288,7 @@ export const HostTypes: GenService<{
     output: typeof HostTypesListResponseSchema;
   },
   /**
-   * Retrieves the details of one specific host type.
+   * Retrieves the details of one specific host types.
    *
    * @generated from rpc osac.public.v1.HostTypes.Get
    */
@@ -310,7 +310,7 @@ export const HostTypes: GenService<{
     output: typeof HostTypesCreateResponseSchema;
   },
   /**
-   * Updates an existing host type.
+   * Updates an existint host type.
    *
    * This method isn't allowed for regular users, only for the system itself.
    *

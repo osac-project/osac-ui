@@ -28,23 +28,14 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file osac/public/v1/external_ip_pool_type.proto.
  */
 export const file_osac_public_v1_external_ip_pool_type: GenFile = /*@__PURE__*/
-  fileDesc("Cipvc2FjL3B1YmxpYy92MS9leHRlcm5hbF9pcF9wb29sX3R5cGUucHJvdG8SDm9zYWMucHVibGljLnYxIrABCg5FeHRlcm5hbElQUG9vbBIKCgJpZBgBIAEoCRIqCghtZXRhZGF0YRgCIAEoCzIYLm9zYWMucHVibGljLnYxLk1ldGFkYXRhEjAKBHNwZWMYAyABKAsyIi5vc2FjLnB1YmxpYy52MS5FeHRlcm5hbElQUG9vbFNwZWMSNAoGc3RhdHVzGAQgASgLMiQub3NhYy5wdWJsaWMudjEuRXh0ZXJuYWxJUFBvb2xTdGF0dXMiSQoSRXh0ZXJuYWxJUFBvb2xTcGVjEjMKCWlwX2ZhbWlseRgDIAEoDjIYLm9zYWMucHVibGljLnYxLklQRmFtaWx5QgbgQQLgQQUiLgoURXh0ZXJuYWxJUFBvb2xTdGF0dXMSFgoJYXZhaWxhYmxlGAYgASgDQgPgQQMiVAoXRXh0ZXJuYWxJUFBvb2xSZWZlcmVuY2USCgoCaWQYASABKAkSDAoEbmFtZRgCIAEoCRIPCgdwcm9qZWN0GAMgASgJEg4KBnNoYXJlZBgEIAEoCGIGcHJvdG8z", [file_google_api_field_behavior, file_osac_public_v1_ip_family_type, file_osac_public_v1_metadata_type]);
+  fileDesc("Cipvc2FjL3B1YmxpYy92MS9leHRlcm5hbF9pcF9wb29sX3R5cGUucHJvdG8SDm9zYWMucHVibGljLnYxIrABCg5FeHRlcm5hbElQUG9vbBIKCgJpZBgBIAEoCRIqCghtZXRhZGF0YRgCIAEoCzIYLm9zYWMucHVibGljLnYxLk1ldGFkYXRhEjAKBHNwZWMYAyABKAsyIi5vc2FjLnB1YmxpYy52MS5FeHRlcm5hbElQUG9vbFNwZWMSNAoGc3RhdHVzGAQgASgLMiQub3NhYy5wdWJsaWMudjEuRXh0ZXJuYWxJUFBvb2xTdGF0dXMiTAoSRXh0ZXJuYWxJUFBvb2xTcGVjEjAKCWlwX2ZhbWlseRgDIAEoDjIYLm9zYWMucHVibGljLnYxLklQRmFtaWx5QgPgQQVKBAgCEAMiLgoURXh0ZXJuYWxJUFBvb2xTdGF0dXMSFgoJYXZhaWxhYmxlGAYgASgDQgPgQQMiVAoXRXh0ZXJuYWxJUFBvb2xSZWZlcmVuY2USCgoCaWQYASABKAkSDAoEbmFtZRgCIAEoCRIPCgdwcm9qZWN0GAMgASgJEg4KBnNoYXJlZBgEIAEoCGIGcHJvdG8z", [file_google_api_field_behavior, file_osac_public_v1_ip_family_type, file_osac_public_v1_metadata_type]);
 
 /**
  * Represents a pool of external IP addresses available for allocation.
  *
- * Each ExternalIPPool supports a single IP family (IPv4 or IPv6). The pool contains one or more CIDR
- * ranges from which individual ExternalIP addresses are allocated. Pools are provider-managed
- * resources created by administrators through the private API.
- *
- * "External" means external to the VirtualNetwork. The addresses may be internet-routable or
- * data-center-routable depending on the deployment topology (e.g., air-gapped environments).
- *
- * The implementation_strategy field determines how IPs from this pool are advertised on the target
- * cluster (e.g., MetalLB L2 mode). This field is set by the system and is not user-configurable.
- *
- * Capacity tracking fields in the status (total, allocated, available) reflect the current utilization
- * of the pool across all its CIDR ranges.
+ * ExternalIPPools are administrator-managed resources. The public API only surfaces pools that are
+ * ready and have available capacity.
+ * Tenants use this resource to discover available pools and select one when allocating an ExternalIP.
  *
  * @generated from message osac.public.v1.ExternalIPPool
  */
@@ -64,14 +55,14 @@ export type ExternalIPPool = Message<"osac.public.v1.ExternalIPPool"> & {
   metadata?: Metadata | undefined;
 
   /**
-   * Desired configuration of the external IP pool (admin-specified).
+   * Configuration of the external IP pool.
    *
    * @generated from field: osac.public.v1.ExternalIPPoolSpec spec = 3;
    */
   spec?: ExternalIPPoolSpec | undefined;
 
   /**
-   * Current state of the external IP pool (system-provided, read-only).
+   * Current capacity information for this pool (system-provided, read-only).
    *
    * @generated from field: osac.public.v1.ExternalIPPoolStatus status = 4;
    */
@@ -86,19 +77,13 @@ export const ExternalIPPoolSchema: GenMessage<ExternalIPPool> = /*@__PURE__*/
   messageDesc(file_osac_public_v1_external_ip_pool_type, 0);
 
 /**
- * Defines the desired configuration for an ExternalIPPool.
- *
- * All spec fields are immutable after creation. To change CIDRs, delete the pool and create a
- * new one. The Update RPC only allows metadata changes (name, labels, annotations).
+ * Defines the configuration of an ExternalIPPool.
  *
  * @generated from message osac.public.v1.ExternalIPPoolSpec
  */
 export type ExternalIPPoolSpec = Message<"osac.public.v1.ExternalIPPoolSpec"> & {
   /**
-   * IP address family for this pool. Required and immutable after creation.
-   *
-   * Determines whether the CIDRs in this pool are IPv4 or IPv6. All CIDRs must match this
-   * family. A single pool cannot mix IPv4 and IPv6 ranges.
+   * IP address family for this pool. Immutable after creation.
    *
    * @generated from field: osac.public.v1.IPFamily ip_family = 3;
    */
@@ -113,18 +98,13 @@ export const ExternalIPPoolSpecSchema: GenMessage<ExternalIPPoolSpec> = /*@__PUR
   messageDesc(file_osac_public_v1_external_ip_pool_type, 1);
 
 /**
- * Represents the current operational state of an ExternalIPPool.
- *
- * Status is system-provided and read-only. Users cannot modify status fields directly; the system
- * updates them based on reconciliation of the spec and feedback from the cluster controller.
+ * Capacity information for an ExternalIPPool exposed to tenants.
  *
  * @generated from message osac.public.v1.ExternalIPPoolStatus
  */
 export type ExternalIPPoolStatus = Message<"osac.public.v1.ExternalIPPoolStatus"> & {
   /**
    * Number of IP addresses available for new allocations from this pool.
-   *
-   * Equal to total minus allocated.
    *
    * @generated from field: int64 available = 6;
    */

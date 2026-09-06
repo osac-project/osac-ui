@@ -94,8 +94,6 @@ export const BareMetalInstancesListResponseSchema: GenMessage<BareMetalInstances
  */
 export type BareMetalInstancesGetRequest = Message<"osac.public.v1.BareMetalInstancesGetRequest"> & {
   /**
-   * Unique identifier of the bare metal instance.
-   *
    * @generated from field: string id = 1;
    */
   id: string;
@@ -176,7 +174,7 @@ export type BareMetalInstancesUpdateRequest = Message<"osac.public.v1.BareMetalI
   /**
    * Lock enables optimistic locking. When set to true, the server verifies that the current version of the object
    * matches the value of the metadata.version field of the submitted object. If they differ the update will be
-   * rejected. This is useful to prevent lost updates when multiple clients are modifying the same object concurrently.
+   * rejected.
    *
    * @generated from field: bool lock = 3;
    */
@@ -212,8 +210,6 @@ export const BareMetalInstancesUpdateResponseSchema: GenMessage<BareMetalInstanc
  */
 export type BareMetalInstancesDeleteRequest = Message<"osac.public.v1.BareMetalInstancesDeleteRequest"> & {
   /**
-   * Unique identifier of the bare metal instance.
-   *
    * @generated from field: string id = 1;
    */
   id: string;
