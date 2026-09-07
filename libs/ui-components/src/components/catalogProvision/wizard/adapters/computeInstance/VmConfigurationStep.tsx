@@ -10,8 +10,9 @@ import {
 import { useField, useFormikContext } from 'formik';
 
 import type { ComputeInstanceCatalogItem } from '@osac/types';
-import { Architecture, DiskImageLifecycle } from '@osac/types';
+import { DiskImageLifecycle } from '@osac/types';
 import { resourceDisplayName } from '@osac/ui-components/api/v1/networking';
+import { architectureLabels } from '@osac/ui-components/components/DiskImage/DiskImageTable';
 import { formatInstanceTypeOptionLabel } from '@osac/ui-components/components/vm/utils';
 
 import { VM_DISK_IMAGE_WIRE_PATH } from './fields';
@@ -29,13 +30,6 @@ import {
   readCatalogFieldDefinitions,
 } from '../../catalogOverlay';
 import UserDataField from '../../fields/UserDataField';
-
-const ARCH_LABELS: Record<Architecture, string> = {
-  [Architecture.UNSPECIFIED]: '',
-  [Architecture.AMD64]: 'AMD64',
-  [Architecture.ARM64]: 'ARM64',
-  [Architecture.S390X]: 'S390X',
-};
 
 interface Props {
   catalogItem: ComputeInstanceCatalogItem | null;
@@ -79,23 +73,23 @@ export const VmConfigurationStep = ({ catalogItem }: Props) => {
     [instanceTypes, t],
   );
 
-  const diskImageOptions = useMemo(
-    () =>
-      diskImages.map((di) => {
-        const name = resourceDisplayName(di.metadata, di.id);
-        const deprecated = di.spec?.lifecycle === DiskImageLifecycle.DEPRECATED;
-        const archList = (di.spec?.architecture ?? [])
-          .map((a) => ARCH_LABELS[a])
-          .filter(Boolean)
-          .join(', ');
-        return {
-          value: di.id,
-          label: deprecated ? `${name} ${t('(deprecated)')}` : name,
-          description: archList || undefined,
-        };
-      }),
-    [diskImages, t],
-  );
+  const diskImageOptions = useMemo(() => {
+    const architectureText = architectureLabels(t);
+
+    return diskImages.map((di) => {
+      const name = resourceDisplayName(di.metadata, di.id);
+      const deprecated = di.spec?.lifecycle === DiskImageLifecycle.DEPRECATED;
+      const archList = (di.spec?.architecture ?? [])
+        .map((a) => architectureText[a] ?? t('Unspecified'))
+        .filter(Boolean)
+        .join(', ');
+      return {
+        value: di.id,
+        label: deprecated ? `${name} ${t('(deprecated)')}` : name,
+        description: archList || undefined,
+      };
+    });
+  }, [diskImages, t]);
 
   const definitions = useMemo(() => readCatalogFieldDefinitions(catalogItem), [catalogItem]);
 
