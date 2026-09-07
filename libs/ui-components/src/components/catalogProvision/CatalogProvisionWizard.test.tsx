@@ -661,7 +661,7 @@ describe('CatalogProvisionWizard', () => {
 
     expect(onProvision.mock.calls[0][0]).toMatchObject({
       spec: {
-        diskImage: 'di-rhel9',
+        diskImage: { id: 'di-rhel9' },
         runStrategy: ComputeInstanceRunStrategy.COMPUTE_INSTANCE_RUN_STRATEGY_ALWAYS,
         instanceType: { id: 'standard-4-8' },
         bootDisk: { sizeGib: 40 },
@@ -1045,7 +1045,7 @@ describe('CatalogProvisionWizard', () => {
     expect(onProvision.mock.calls[0][0]).toMatchObject({
       metadata: { name: 'web-01' },
       spec: {
-        diskImage: 'di-rhel9',
+        diskImage: { id: 'di-rhel9' },
         instanceType: { id: 'standard-4-8' },
       },
     });

@@ -84,7 +84,7 @@ describe('buildComputeInstanceCreatePayload', () => {
       spec: {
         catalogItem: { id: vmCatalogItem.id },
         instanceType: { id: 'standard-4-8' },
-        diskImage: 'di-rhel9',
+        diskImage: { id: 'di-rhel9' },
         runStrategy: ComputeInstanceRunStrategy.COMPUTE_INSTANCE_RUN_STRATEGY_ALWAYS,
         networkAttachments: [
           {
