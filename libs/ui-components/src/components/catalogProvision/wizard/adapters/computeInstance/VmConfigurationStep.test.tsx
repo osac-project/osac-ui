@@ -82,15 +82,34 @@ describe('VmConfigurationStep', () => {
     });
   });
 
-  it('does not clear the selected disk image when the list request fails', async () => {
+  it('stores the selected disk image name in Formik', async () => {
     const values = createEmptyComputeInstanceValues();
-    values.spec.diskImage = 'di-1';
-    const seen: string[] = [];
+    const seen: Array<{ id: string; name: string }> = [];
 
     renderWithProviders(
       <Formik initialValues={values} onSubmit={() => undefined}>
         {({ values: formValues }) => {
           seen.push(formValues.spec.diskImage);
+          return <VmConfigurationStep catalogItem={makeCatalogItem()} />;
+        }}
+      </Formik>,
+      { apiFixtures: { diskImages: [makeDiskImage('di-1', 'rhel9')], instanceTypes: [] } },
+    );
+
+    await waitFor(() => {
+      expect(seen.at(-1)).toEqual({ id: 'di-1', name: 'rhel9' });
+    });
+  });
+
+  it('does not clear the selected disk image when the list request fails', async () => {
+    const values = createEmptyComputeInstanceValues();
+    values.spec.diskImage = { id: 'di-1', name: 'rhel9' };
+    const seen: string[] = [];
+
+    renderWithProviders(
+      <Formik initialValues={values} onSubmit={() => undefined}>
+        {({ values: formValues }) => {
+          seen.push(formValues.spec.diskImage.id);
           return <VmConfigurationStep catalogItem={makeCatalogItem()} />;
         }}
       </Formik>,

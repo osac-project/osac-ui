@@ -55,7 +55,7 @@ describe('buildComputeInstanceCreatePayload ssh key', () => {
       spec: {
         ...createEmptyComputeInstanceValues().spec,
         sshPublicKey: 'ssh-ed25519 locked',
-        diskImage: '',
+        diskImage: { id: '', name: '' },
         networking: {
           virtualNetwork: 'vn-1',
           subnet: 'subnet-1',
@@ -78,7 +78,7 @@ describe('buildComputeInstanceCreatePayload ssh key', () => {
       spec: {
         ...createEmptyComputeInstanceValues().spec,
         sshPublicKey: 'ssh-ed25519 default',
-        diskImage: '',
+        diskImage: { id: '', name: '' },
         networking: {
           virtualNetwork: 'vn-1',
           subnet: 'subnet-1',
@@ -100,7 +100,7 @@ describe('buildComputeInstanceCreatePayload ssh key', () => {
       metadata: { name: 'web-02', project: '' },
       spec: {
         ...createEmptyComputeInstanceValues().spec,
-        diskImage: '',
+        diskImage: { id: '', name: '' },
         networking: {
           virtualNetwork: 'vn-1',
           subnet: 'subnet-1',

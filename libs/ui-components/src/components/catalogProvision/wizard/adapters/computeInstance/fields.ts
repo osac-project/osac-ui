@@ -10,6 +10,11 @@ export interface ComputeInstanceDiskValues {
   storageTier: string;
 }
 
+export interface ComputeInstanceDiskImageValues {
+  id: string;
+  name: string;
+}
+
 export interface ComputeInstanceWizardValues {
   catalogItemId: string;
   metadata: {
@@ -18,8 +23,7 @@ export interface ComputeInstanceWizardValues {
   };
   spec: {
     sshPublicKey: string;
-    /** Disk image resource ID; display names are resolved from the resource when needed. */
-    diskImage: string;
+    diskImage: ComputeInstanceDiskImageValues;
     instanceType: string;
     userData: string;
     bootDisk: ComputeInstanceDiskValues;

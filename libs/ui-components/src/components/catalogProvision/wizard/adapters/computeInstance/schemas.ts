@@ -138,7 +138,9 @@ export const buildComputeInstanceStepSchema = (
     case 'configuration':
       return yup.object({
         spec: yup.object({
-          diskImage: fields.specDiskImage,
+          diskImage: yup.object({
+            id: fields.specDiskImage,
+          }),
           instanceType: fields.specInstanceType,
           userData: fields.specUserData,
         }),

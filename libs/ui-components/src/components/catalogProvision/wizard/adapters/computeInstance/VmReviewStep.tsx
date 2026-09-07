@@ -14,10 +14,8 @@ import { useFormikContext } from 'formik';
 
 import { type SecurityGroup } from '@osac/types';
 import { cel } from '@osac/ui-components/api/cel';
-import { useDiskImage } from '@osac/ui-components/api/v1/disk-image';
 import { useInstanceType } from '@osac/ui-components/api/v1/instance-types';
 import {
-  resourceDisplayName,
   useSecurityGroups,
   useSubnet,
   useVirtualNetwork,
@@ -55,12 +53,6 @@ export const VmReviewStep = ({ catalogItem }: Props) => {
   } = useInstanceType(values.spec.instanceType);
 
   const {
-    data: diskImage,
-    isLoading: diskImageLoading,
-    error: diskImageError,
-  } = useDiskImage(values.spec.diskImage);
-
-  const {
     data: virtualNetwork,
     isLoading: virtNetLoading,
     error: virtNetErr,
@@ -92,7 +84,6 @@ export const VmReviewStep = ({ catalogItem }: Props) => {
 
   if (
     instanceLoading ||
-    diskImageLoading ||
     virtNetLoading ||
     subnetLoading ||
     scLoading ||
@@ -112,13 +103,6 @@ export const VmReviewStep = ({ catalogItem }: Props) => {
         <StackItem>
           <Alert variant="warning" isInline title={t('Failed to fetch instance type')}>
             {getErrorMessage(instanceErr)}
-          </Alert>
-        </StackItem>
-      )}
-      {!!diskImageError && (
-        <StackItem>
-          <Alert variant="warning" isInline title={t('Could not load disk images')}>
-            {getErrorMessage(diskImageError)}
           </Alert>
         </StackItem>
       )}
@@ -191,11 +175,7 @@ export const VmReviewStep = ({ catalogItem }: Props) => {
           <DescriptionListGroup>
             <DescriptionListTerm>{t('Disk image')}</DescriptionListTerm>
             <DescriptionListDescription>
-              {formatReviewScalar(
-                diskImage
-                  ? resourceDisplayName(diskImage.metadata, diskImage.id)
-                  : values.spec.diskImage,
-              )}
+              {formatReviewScalar(values.spec.diskImage.name || values.spec.diskImage.id)}
             </DescriptionListDescription>
           </DescriptionListGroup>
 
