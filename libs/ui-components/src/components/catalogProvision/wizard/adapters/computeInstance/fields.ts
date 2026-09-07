@@ -1,9 +1,3 @@
-import { ComputeInstanceRunStrategy } from '@osac/types';
-
-/** VMs are always created in the running state; stop/start is handled on the details page. */
-export const VM_CREATE_RUN_STRATEGY =
-  ComputeInstanceRunStrategy.COMPUTE_INSTANCE_RUN_STRATEGY_ALWAYS;
-
 export interface ComputeInstanceNetworkingValues {
   virtualNetwork: string;
   subnet: string;
@@ -16,11 +10,6 @@ export interface ComputeInstanceDiskValues {
   storageTier: string;
 }
 
-export interface ComputeInstanceDiskImageValues {
-  id: string;
-  name: string;
-}
-
 export interface ComputeInstanceWizardValues {
   catalogItemId: string;
   metadata: {
@@ -29,7 +18,8 @@ export interface ComputeInstanceWizardValues {
   };
   spec: {
     sshPublicKey: string;
-    diskImage: ComputeInstanceDiskImageValues;
+    /** Disk image resource ID; display names are resolved from the resource when needed. */
+    diskImage: string;
     instanceType: string;
     userData: string;
     bootDisk: ComputeInstanceDiskValues;

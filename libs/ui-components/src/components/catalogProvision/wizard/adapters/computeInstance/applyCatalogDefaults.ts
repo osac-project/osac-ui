@@ -48,7 +48,7 @@ export const applyVmCatalogConfigurationDefaults = (
   const diskImageOverlay = getCatalogFieldOverlay(
     VM_DISK_IMAGE_WIRE_PATH,
     definitions,
-    t('catalogProvision.vm.fields.diskImage'),
+    t('Disk image'),
   );
   const userDataOverlay = getCatalogFieldOverlay(
     'spec.user_data',
@@ -71,7 +71,7 @@ export const applyVmCatalogConfigurationDefaults = (
     t('Additional disks'),
   );
 
-  setDefault(helpers, 'spec.diskImage.id', overlayDefaultToFormValue(diskImageOverlay));
+  setDefault(helpers, 'spec.diskImage', overlayDefaultToFormValue(diskImageOverlay));
   setDefault(helpers, 'spec.userData', overlayDefaultToFormValue(userDataOverlay));
   setDefault(helpers, 'spec.bootDisk.sizeGib', overlayDefaultToFormValue(bootDiskOverlay) ?? '');
   setDefault(helpers, 'spec.bootDisk.storageTier', overlayDefaultToFormValue(storageTierOverlay));

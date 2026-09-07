@@ -1,9 +1,12 @@
 import { type MessageInitShape } from '@bufbuild/protobuf';
 
-import { type ComputeInstanceCatalogItem, ComputeInstanceSchema } from '@osac/types';
+import {
+  type ComputeInstanceCatalogItem,
+  ComputeInstanceRunStrategy,
+  ComputeInstanceSchema,
+} from '@osac/types';
 
 import type { ComputeInstanceWizardValues } from './fields';
-import { VM_CREATE_RUN_STRATEGY } from './fields';
 import { getCatalogFieldOverlay, readCatalogFieldDefinitions } from '../../catalogOverlay';
 
 export const createEmptyComputeInstanceValues = (): ComputeInstanceWizardValues => ({
@@ -11,7 +14,7 @@ export const createEmptyComputeInstanceValues = (): ComputeInstanceWizardValues 
   metadata: { name: '', project: '' },
   spec: {
     sshPublicKey: '',
-    diskImage: { id: '', name: '' },
+    diskImage: '',
     instanceType: '',
     userData: '',
     bootDisk: { sizeGib: '', storageTier: '' },
@@ -40,9 +43,9 @@ export const buildComputeInstanceCreatePayload = (
       id: values.spec.instanceType,
     },
     diskImage: {
-      id: values.spec.diskImage.id,
+      id: values.spec.diskImage,
     },
-    runStrategy: VM_CREATE_RUN_STRATEGY,
+    runStrategy: ComputeInstanceRunStrategy.COMPUTE_INSTANCE_RUN_STRATEGY_ALWAYS,
     networkAttachments: [
       {
         subnet: {

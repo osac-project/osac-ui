@@ -46,20 +46,19 @@ export const VmConfigurationStep = ({ catalogItem }: Props) => {
 
   const {
     data: instanceTypes = [],
-    isPending: instanceTypesLoading,
-    isError: instanceTypesError,
+    isLoading: instanceTypesLoading,
+    error: instanceTypesError,
     refetch: refetchInstanceTypes,
   } = useInstanceTypes({ filter: INSTANCE_TYPE_ACTIVE_LIST_FILTER });
 
   const {
     data: diskImages = [],
-    isPending: diskImagesLoading,
-    isError: diskImagesError,
+    isLoading: diskImagesLoading,
+    error: diskImagesError,
     refetch: refetchDiskImages,
   } = useDiskImages();
 
-  const [diskImageField] = useField<string>('spec.diskImage.id');
-  const [diskImageNameField] = useField<string>('spec.diskImage.name');
+  const [diskImageField] = useField<string>('spec.diskImage');
   const { setFieldValue } = useFormikContext();
 
   const selectedDiskImage = useMemo(
@@ -90,9 +89,7 @@ export const VmConfigurationStep = ({ catalogItem }: Props) => {
           .join(', ');
         return {
           value: di.id,
-          label: deprecated
-            ? `${name} ${t('catalogProvision.vm.fields.diskImageDeprecatedSuffix')}`
-            : name,
+          label: deprecated ? `${name} ${t('(deprecated)')}` : name,
           description: archList || undefined,
         };
       }),
@@ -111,27 +108,13 @@ export const VmConfigurationStep = ({ catalogItem }: Props) => {
       diskImageField.value &&
       !diskImages.find((di) => di.id === diskImageField.value)
     ) {
-      void setFieldValue('spec.diskImage', { id: '', name: '' });
+      void setFieldValue('spec.diskImage', '');
     }
   }, [diskImagesLoading, diskImagesError, diskImages, diskImageField.value, setFieldValue]);
 
-  useEffect(() => {
-    if (!selectedDiskImage) {
-      return;
-    }
-    const name = resourceDisplayName(selectedDiskImage.metadata, selectedDiskImage.id);
-    if (diskImageNameField.value !== name) {
-      void setFieldValue('spec.diskImage.name', name);
-    }
-  }, [selectedDiskImage, diskImageNameField.value, setFieldValue]);
-
   const overlays = useMemo(
     () => ({
-      diskImage: getCatalogFieldOverlay(
-        VM_DISK_IMAGE_WIRE_PATH,
-        definitions,
-        t('catalogProvision.vm.fields.diskImage'),
-      ),
+      diskImage: getCatalogFieldOverlay(VM_DISK_IMAGE_WIRE_PATH, definitions, t('Disk image')),
       userData: getCatalogFieldOverlay(
         'spec.user_data',
         definitions,
@@ -150,7 +133,7 @@ export const VmConfigurationStep = ({ catalogItem }: Props) => {
     <Stack hasGutter>
       {diskImagesError ? (
         <StackItem>
-          <Alert variant="danger" isInline title={t('catalogProvision.diskImages.loadError')}>
+          <Alert variant="danger" isInline title={t('Could not load disk images')}>
             <Button variant="link" isInline onClick={() => void refetchDiskImages()}>
               {t('catalogProvision.actions.retry')}
             </Button>
@@ -169,7 +152,11 @@ export const VmConfigurationStep = ({ catalogItem }: Props) => {
       {!diskImagesLoading && !diskImagesError && diskImages.length === 0 ? (
         <StackItem>
           <EmptyState>
-            <EmptyStateBody>{t('catalogProvision.diskImages.emptyStateBody')}</EmptyStateBody>
+            <EmptyStateBody>
+              {t(
+                'No disk images are available. Ask an administrator to create a disk image first.',
+              )}
+            </EmptyStateBody>
           </EmptyState>
         </StackItem>
       ) : null}
@@ -178,20 +165,22 @@ export const VmConfigurationStep = ({ catalogItem }: Props) => {
           <Alert
             variant="warning"
             isInline
-            title={t('catalogProvision.diskImages.deprecatedWarning')}
+            title={t(
+              'The selected disk image is deprecated and may be removed in a future release.',
+            )}
           />
         </StackItem>
       ) : null}
       <StackItem>
         <OsacForm>
           <SelectField
-            name="spec.diskImage.id"
+            name="spec.diskImage"
             label={overlays.diskImage.label}
             fieldId="vm-disk-image"
             isRequired
             autoSelectSingleOption
             isLoading={diskImagesLoading}
-            placeholder={t('catalogProvision.vm.placeholders.selectDiskImage')}
+            placeholder={t('Select a disk image')}
             isDisabled={!overlays.diskImage.editable || diskImages.length === 0}
             options={diskImageOptions}
           />

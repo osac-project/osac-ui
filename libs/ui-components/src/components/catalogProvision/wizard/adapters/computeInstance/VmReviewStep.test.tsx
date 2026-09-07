@@ -3,7 +3,12 @@ import { screen } from '@testing-library/react';
 import { Formik } from 'formik';
 import { describe, expect, it } from 'vitest';
 
-import { StorageTierSchema, StorageTierState } from '@osac/types';
+import {
+  DiskImageLifecycle,
+  DiskImageSchema,
+  StorageTierSchema,
+  StorageTierState,
+} from '@osac/types';
 
 import { createEmptyComputeInstanceValues } from './payload';
 import { VmReviewStep } from './VmReviewStep';
@@ -17,6 +22,13 @@ const makeTier = (name: string, displayName: string) =>
   });
 
 const storageTiers = [makeTier('balanced', 'Balanced'), makeTier('fast', 'Fast SSD')];
+const diskImages = [
+  create(DiskImageSchema, {
+    id: 'di-rhel9',
+    metadata: { name: 'rhel9' },
+    spec: { lifecycle: DiskImageLifecycle.AVAILABLE },
+  }),
+];
 
 const renderReviewStep = (
   specOverrides: Partial<ReturnType<typeof createEmptyComputeInstanceValues>['spec']>,
@@ -29,7 +41,7 @@ const renderReviewStep = (
     >
       <VmReviewStep catalogItem={null} />
     </Formik>,
-    { apiFixtures: { publicStorageTiers: storageTiers } },
+    { apiFixtures: { publicStorageTiers: storageTiers, diskImages } },
   );
 };
 
@@ -60,8 +72,8 @@ describe('VmReviewStep — Storage section', () => {
     expect(screen.getAllByText('Boot disk')).toHaveLength(1);
   });
 
-  it('shows the disk image name from spec without fetching the resource', async () => {
-    renderReviewStep({ diskImage: { id: 'di-rhel9', name: 'rhel9' } });
+  it('resolves the disk image name from the selected resource', async () => {
+    renderReviewStep({ diskImage: 'di-rhel9' });
 
     expect(await screen.findByText('rhel9')).toBeInTheDocument();
     expect(screen.queryByText('di-rhel9')).not.toBeInTheDocument();

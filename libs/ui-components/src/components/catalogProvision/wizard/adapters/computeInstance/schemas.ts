@@ -20,7 +20,7 @@ const buildComputeInstanceFieldDefinitions = (catalogItem: unknown, t: TFunction
   const diskImageOverlay = getCatalogFieldOverlay(
     VM_DISK_IMAGE_WIRE_PATH,
     definitions,
-    t('catalogProvision.vm.fields.diskImage'),
+    t('Disk image'),
   );
   const userDataOverlay = getCatalogFieldOverlay(
     'spec.user_data',
@@ -54,10 +54,10 @@ const buildComputeInstanceFieldDefinitions = (catalogItem: unknown, t: TFunction
       t('catalogProvision.validation.required'),
     ),
     specDiskImage: mergeCatalogValidation(
-      yup.string().required(t('catalogProvision.validation.diskImageRequired')),
+      yup.string().required(t('Disk image is required')),
       diskImageOverlay,
       true,
-      t('catalogProvision.validation.diskImageRequired'),
+      t('Disk image is required'),
     ),
     specInstanceType: yup.string().required(t('catalogProvision.validation.instanceTypeRequired')),
     specUserData: mergeCatalogValidation(
@@ -138,9 +138,7 @@ export const buildComputeInstanceStepSchema = (
     case 'configuration':
       return yup.object({
         spec: yup.object({
-          diskImage: yup.object({
-            id: fields.specDiskImage,
-          }),
+          diskImage: fields.specDiskImage,
           instanceType: fields.specInstanceType,
           userData: fields.specUserData,
         }),

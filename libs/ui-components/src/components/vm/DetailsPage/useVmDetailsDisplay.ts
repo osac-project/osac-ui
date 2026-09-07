@@ -49,7 +49,7 @@ export const useVmDetailsDisplay = (vm: ComputeInstance) => {
     const imageOverlay = getCatalogFieldOverlay(
       VM_DISK_IMAGE_WIRE_PATH,
       definitions,
-      t('catalogProvision.vm.fields.diskImage'),
+      t('Disk image'),
     );
     const userDataOverlay = getCatalogFieldOverlay(
       'spec.user_data',
