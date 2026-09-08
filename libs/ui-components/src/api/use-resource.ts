@@ -7,7 +7,7 @@ import {
   create,
 } from '@bufbuild/protobuf';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { UseMutationOptions, UseQueryOptions } from '@tanstack/react-query';
+import type { QueryClient, UseMutationOptions, UseQueryOptions } from '@tanstack/react-query';
 
 import { useApiFetch } from './api-context';
 import { buildUpdateMaskPaths } from './v1/update-mask';
@@ -32,6 +32,20 @@ type ResourceMutationOptions<Data extends DescMessage, Variables> = Omit<
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   value !== null && typeof value === 'object';
+
+// invalidate cache for both private and public types
+const invalidateResourceQueries = async (queryClient: QueryClient, typeName: string) => {
+  const [source, counterpart] = typeName.startsWith('osac.private.')
+    ? ['osac.private.', 'osac.public.']
+    : ['osac.public.', 'osac.private.'];
+  const typeNames = [typeName, typeName.replace(source, counterpart)];
+
+  await Promise.all(
+    typeNames.map((resourceTypeName) =>
+      queryClient.invalidateQueries({ queryKey: [resourceTypeName] }),
+    ),
+  );
+};
 
 const buildUpdateRequest = <Input extends DescMessage, Output extends DescMessage>(
   service: ResourceService<'update', Input, Output>,
@@ -95,7 +109,7 @@ export const useCreateResource = <Input extends DescMessage, Output extends Desc
     ...options,
     mutationFn: (request) => client.create(request),
     onSuccess: async (...args) => {
-      await queryClient.invalidateQueries({ queryKey: [service.typeName] });
+      await invalidateResourceQueries(queryClient, service.typeName);
       await options.onSuccess?.(...args);
     },
   });
@@ -112,7 +126,7 @@ export const useUpdateResource = <Input extends DescMessage, Output extends Desc
     ...options,
     mutationFn: (request) => client.update(buildUpdateRequest(service, request)),
     onSuccess: async (...args) => {
-      await queryClient.invalidateQueries({ queryKey: [service.typeName] });
+      await invalidateResourceQueries(queryClient, service.typeName);
       await options.onSuccess?.(...args);
     },
   });
@@ -129,7 +143,7 @@ export const useDeleteResource = <Input extends DescMessage, Output extends Desc
     ...options,
     mutationFn: (request) => client.delete(request),
     onSuccess: async (...args) => {
-      await queryClient.invalidateQueries({ queryKey: [service.typeName] });
+      await invalidateResourceQueries(queryClient, service.typeName);
       await options.onSuccess?.(...args);
     },
   });
