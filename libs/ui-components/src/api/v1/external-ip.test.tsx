@@ -11,6 +11,7 @@ import {
   ExternalIPAttachmentsCreateRequest,
   ExternalIPState,
   ExternalIPs,
+  ExternalIPsCreateRequest,
 } from '@osac/types';
 
 import {
@@ -122,15 +123,20 @@ describe('pollExternalIpUntilAllocated', () => {
 });
 
 const createAttachExternalIpTransport = ({
+  onExternalIpCreate,
   onExternalIpDelete,
   onAttachmentCreate,
 }: {
+  onExternalIpCreate?: (req: ExternalIPsCreateRequest) => void;
   onExternalIpDelete?: (req: { id: string }) => void;
   onAttachmentCreate?: (req: ExternalIPAttachmentsCreateRequest) => ExternalIPAttachment;
 } = {}) =>
   createRouterTransport((router) => {
     router.service(ExternalIPs, {
-      create: () => ({ object: externalIpWithState(ExternalIPState.EXTERNAL_IP_STATE_PENDING) }),
+      create: (req) => {
+        onExternalIpCreate?.(req);
+        return { object: externalIpWithState(ExternalIPState.EXTERNAL_IP_STATE_PENDING) };
+      },
       get: () => ({ object: externalIpWithState(ExternalIPState.EXTERNAL_IP_STATE_ALLOCATED) }),
       delete: (req) => {
         onExternalIpDelete?.(req);
@@ -184,6 +190,34 @@ describe('useAttachExternalIp', () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
     expect(result.current.data?.spec?.externalIp?.id).toBe('eip-1');
+  });
+
+  it('sends metadata.name on ExternalIP and ExternalIPAttachment create requests', async () => {
+    let capturedExternalIpReq: ExternalIPsCreateRequest | undefined;
+    let capturedAttachmentReq: ExternalIPAttachmentsCreateRequest | undefined;
+    const transport = createAttachExternalIpTransport({
+      onExternalIpCreate: (req) => {
+        capturedExternalIpReq = req;
+      },
+      onAttachmentCreate: (req) => {
+        capturedAttachmentReq = req;
+        return {
+          id: 'attachment-1',
+          spec: {
+            externalIp: { id: 'eip-1' },
+            target: req.object?.spec?.target,
+          },
+        } as ExternalIPAttachment;
+      },
+    });
+
+    const { result } = renderUseAttachExternalIp(transport);
+    result.current.mutate({ computeInstanceId: 'vm-1', pool: 'pool-1' });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(capturedExternalIpReq?.object?.metadata?.name).toMatch(/^ext-ip-[a-f0-9]{8}$/);
+    expect(capturedAttachmentReq?.object?.metadata?.name).toMatch(/^ext-ip-attach-[a-f0-9]{8}$/);
   });
 
   it('rolls back the allocated ExternalIP when creating the attachment fails', async () => {

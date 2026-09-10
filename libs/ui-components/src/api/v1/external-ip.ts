@@ -38,6 +38,9 @@ export type AttachExternalIpInput = {
   pool: string;
 };
 
+const generateResourceName = (prefix: string): string =>
+  `${prefix}-${crypto.randomUUID().slice(0, 8)}`;
+
 export const useAttachExternalIp = () => {
   const externalIpsClient = useApiFetch(ExternalIPs);
   const attachmentsClient = useApiFetch(ExternalIPAttachments);
@@ -45,7 +48,10 @@ export const useAttachExternalIp = () => {
   return useMutation({
     mutationFn: async ({ computeInstanceId, pool }: AttachExternalIpInput) => {
       const createResp = await externalIpsClient.create({
-        object: { spec: { pool: { id: pool } } },
+        object: {
+          metadata: { name: generateResourceName('ext-ip') },
+          spec: { pool: { id: pool } },
+        },
       });
       if (!createResp.object) {
         throw new Error('External IP not found in response');
@@ -63,6 +69,7 @@ export const useAttachExternalIp = () => {
       try {
         const attachResp = await attachmentsClient.create({
           object: {
+            metadata: { name: generateResourceName('ext-ip-attach') },
             spec: {
               externalIp: {
                 id: allocated.id,
