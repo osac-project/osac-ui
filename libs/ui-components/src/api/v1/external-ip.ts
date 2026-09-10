@@ -36,6 +36,7 @@ export const pollExternalIpUntilAllocated = async (
 export type AttachExternalIpInput = {
   computeInstanceId: string;
   pool: string;
+  vmName: string;
 };
 
 export const useAttachExternalIp = () => {
@@ -43,9 +44,13 @@ export const useAttachExternalIp = () => {
   const attachmentsClient = useApiFetch(ExternalIPAttachments);
   const qc = useApiQueryClient();
   return useMutation({
-    mutationFn: async ({ computeInstanceId, pool }: AttachExternalIpInput) => {
+    mutationFn: async ({ computeInstanceId, pool, vmName }: AttachExternalIpInput) => {
+      const suffix = crypto.randomUUID().slice(0, 8);
       const createResp = await externalIpsClient.create({
-        object: { spec: { pool: { id: pool } } },
+        object: {
+          metadata: { name: `${vmName}-eip-${suffix}` },
+          spec: { pool: { id: pool } },
+        },
       });
       if (!createResp.object) {
         throw new Error('External IP not found in response');
@@ -63,6 +68,7 @@ export const useAttachExternalIp = () => {
       try {
         const attachResp = await attachmentsClient.create({
           object: {
+            metadata: { name: `${vmName}-eip-att-${suffix}` },
             spec: {
               externalIp: {
                 id: allocated.id,
