@@ -7,11 +7,17 @@ import { IdentityProviderPhase } from '@osac/types';
 import IdentityProviderListPage from './IdentityProviderListPage';
 import { renderWithProviders } from '../../test-utils/TestProviders';
 
-const makeIdentityProvider = (id: string, title: string, phase?: IdentityProviderPhase) =>
+const makeIdentityProvider = (
+  id: string,
+  title: string,
+  phase?: IdentityProviderPhase,
+  tenant?: string,
+) =>
   ({
     id,
     metadata: {
       creationTimestamp: { seconds: BigInt(1717000000), nanos: 0 },
+      tenant: tenant ?? 'tenant-default',
     },
     spec: {
       title,
@@ -22,8 +28,8 @@ const makeIdentityProvider = (id: string, title: string, phase?: IdentityProvide
   }) as IdentityProvider;
 
 const defaultIdentityProviders = [
-  makeIdentityProvider('idp-1', 'Corporate OIDC', IdentityProviderPhase.READY),
-  makeIdentityProvider('idp-2', 'GitHub SSO', IdentityProviderPhase.ERROR),
+  makeIdentityProvider('idp-1', 'Corporate OIDC', IdentityProviderPhase.READY, 'acme-corp'),
+  makeIdentityProvider('idp-2', 'GitHub SSO', IdentityProviderPhase.ERROR, 'dev-team'),
 ];
 
 const renderPage = (identityProviders: IdentityProvider[] = defaultIdentityProviders) =>
@@ -68,6 +74,15 @@ describe('IdentityProviderListPage', () => {
     await waitFor(() => {
       expect(screen.getAllByText('OIDC')).toHaveLength(2);
     });
+  });
+
+  it('renders tenant column for each identity provider', async () => {
+    renderPage();
+
+    await waitFor(() => {
+      expect(screen.getByText('acme-corp')).toBeInTheDocument();
+    });
+    expect(screen.getByText('dev-team')).toBeInTheDocument();
   });
 
   it('shows empty state when there are no identity providers', async () => {

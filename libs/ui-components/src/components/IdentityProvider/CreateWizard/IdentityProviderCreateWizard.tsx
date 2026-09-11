@@ -125,13 +125,15 @@ const IdentityProviderCreateWizard = ({ idp }: IdentityProviderCreateWizard) => 
               }}
             >
               <WizardStep id="general" name={t('General')}>
-                {currentStep === 'general' && <IdpGeneralStep isEdit={!!idp} />}
+                {currentStep === 'general' && (
+                  <IdpGeneralStep isEdit={!!idp} tenant={idp?.metadata?.tenant} />
+                )}
               </WizardStep>
               <WizardStep id="configuration" name={t('Configuration')}>
                 {currentStep === 'configuration' && <IdpConfigurationStep />}
               </WizardStep>
               <WizardStep id="review" name={t('Review')}>
-                {currentStep === 'review' && <IdpReviewStep />}
+                {currentStep === 'review' && <IdpReviewStep tenant={idp?.metadata?.tenant} />}
               </WizardStep>
             </Wizard>
           </PageSection>

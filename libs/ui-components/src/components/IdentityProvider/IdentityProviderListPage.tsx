@@ -90,6 +90,7 @@ const IdentityProviderListPage = () => {
                 <Th>{t('Name')}</Th>
                 <Th>{t('Status')}</Th>
                 <Th>{t('Type')}</Th>
+                <Th>{t('Tenant')}</Th>
                 <Th>{t('Created')}</Th>
                 <Th aria-label={t('Actions')} />
               </Tr>
@@ -104,6 +105,7 @@ const IdentityProviderListPage = () => {
                     <IdentityProviderStatusLabel idp={idp} />
                   </Td>
                   <Td dataLabel={t('Type')}>{resolveIdpType(t, idp.spec?.config.case)}</Td>
+                  <Td dataLabel={t('Tenant')}>{idp.metadata?.tenant || '-'}</Td>
                   <Td dataLabel={t('Created')}>
                     <Timestamp value={idp.metadata?.creationTimestamp} />
                   </Td>
