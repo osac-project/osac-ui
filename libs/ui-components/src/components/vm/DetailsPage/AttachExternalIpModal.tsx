@@ -55,6 +55,7 @@ const AttachExternalIpModal = ({ vm, onClose, onSuccess }: AttachExternalIpModal
           await attachExternalIp.mutateAsync({
             computeInstanceId: vm.id,
             pool: values.pool,
+            vmName: vm.metadata?.name ?? vm.id,
           });
           onSuccess();
         } catch {

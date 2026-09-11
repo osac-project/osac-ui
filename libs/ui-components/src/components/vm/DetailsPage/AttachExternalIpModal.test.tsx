@@ -65,6 +65,7 @@ describe('AttachExternalIpModal', () => {
     expect(mutateAsync).toHaveBeenCalledWith({
       computeInstanceId: 'vm-1',
       pool: 'pool-1',
+      vmName: 'test-vm',
     });
     expect(mockOnSuccess).toHaveBeenCalled();
   });
