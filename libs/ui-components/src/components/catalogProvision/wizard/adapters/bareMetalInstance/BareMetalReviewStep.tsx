@@ -12,9 +12,9 @@ import {
 import { useFormikContext } from 'formik';
 
 import { BareMetalInstanceType, BareMetalInstanceTypes } from '@osac/types';
+import { Projects } from '@osac/types';
 import { cel } from '@osac/ui-components/api/cel';
 import { useListResource } from '@osac/ui-components/api/use-resource';
-import { useProjects } from '@osac/ui-components/api/v1/project';
 import { CatalogItem } from '@osac/ui-components/components/catalog/catalogItemDisplay';
 import {
   fullProjectPathToQueryFilter,
@@ -41,7 +41,7 @@ export const BareMetalReviewStep = ({ catalogItem }: Props) => {
   const { t } = useTranslation();
   const { values } = useFormikContext<BareMetalInstanceWizardValues>();
 
-  const { data, isLoading, error } = useProjects({
+  const { data, isLoading, error } = useListResource(Projects, {
     filter: fullProjectPathToQueryFilter(values.metadata.project),
   });
 
@@ -116,7 +116,7 @@ export const BareMetalReviewStep = ({ catalogItem }: Props) => {
           <DescriptionListGroup>
             <DescriptionListTerm>{t('Project')}</DescriptionListTerm>
             <DescriptionListDescription>
-              {data?.length ? getProjectName(data[0], t) : '-'}
+              {data?.items.length ? getProjectName(data.items[0], t) : '-'}
             </DescriptionListDescription>
           </DescriptionListGroup>
           <DescriptionListGroup>

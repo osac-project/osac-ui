@@ -4,7 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
-import { IdentityProviderSchema, IdentityProviders } from '@osac/types';
+import { IdentityProviderSchema, IdentityProviders, ProjectSchema, Projects } from '@osac/types';
 import { TenantSchema, Tenants } from '@osac/types/private';
 
 import { ApiProvider } from './api-context';
@@ -12,6 +12,7 @@ import {
   useCreateResource,
   useDeleteResource,
   useGetResource,
+  useListAllResources,
   useListResource,
   useUpdateResource,
 } from './use-resource';
@@ -28,6 +29,12 @@ const makeIdentityProvider = (id: string) =>
   create(IdentityProviderSchema, {
     id,
     spec: { title: `Identity provider ${id}`, enabled: true },
+  });
+
+const makeProject = (id: string) =>
+  create(ProjectSchema, {
+    id,
+    metadata: { name: `project-${id}` },
   });
 
 const makeWrapper = (transport: ReturnType<typeof createMockConnectTransport>) => {
@@ -53,6 +60,18 @@ describe('resource queries', () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(result.current.data?.items.map((tenant) => tenant.id)).toEqual(['tenant-1', 'tenant-2']);
+  });
+
+  it('lists all resources across pages', async () => {
+    const projects = Array.from({ length: 101 }, (_, index) => makeProject(`${index + 1}`));
+    const transport = createMockConnectTransport({ projects });
+    const { wrapper } = makeWrapper(transport);
+    const { result } = renderHook(() => useListAllResources(Projects), { wrapper });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(result.current.data?.items).toHaveLength(101);
+    expect(result.current.data?.size).toBe(101);
+    expect(result.current.data?.total).toBe(101);
   });
 
   it('gets a resource with inferred request and response types', async () => {

@@ -10,8 +10,8 @@ import {
   Skeleton,
 } from '@patternfly/react-core';
 
-import { Project } from '@osac/types';
-import { useAllProjects } from '@osac/ui-components/api/v1/project';
+import { Project, Projects } from '@osac/types';
+import { useListAllResources } from '@osac/ui-components/api/use-resource';
 import { serializePageFilter } from '@osac/ui-components/hooks/use-page-filter';
 import { PROJECT_FILTER_PARAM, useSession } from '@osac/ui-components/hooks/use-session';
 import { getErrorMessage } from '@osac/ui-components/utils/error';
@@ -23,7 +23,7 @@ const ProjectFilter = () => {
   const { t } = useTranslation();
   const { projects, setProjects } = useSession();
   const [isOpen, setIsOpen] = useState(false);
-  const { data, isLoading, error } = useAllProjects();
+  const { data, isLoading, error } = useListAllResources(Projects);
   const [searchParams, setSearchParams] = useSearchParams();
 
   useEffect(() => {
@@ -55,7 +55,7 @@ const ProjectFilter = () => {
   const selectedProjects: Project[] = [];
 
   projects.forEach((p) => {
-    const project = data?.find((d) => getFullProjectPath(d) === p);
+    const project = data?.items.find((d) => getFullProjectPath(d) === p);
     if (project) {
       selectedProjects.push(project);
     }
@@ -73,7 +73,7 @@ const ProjectFilter = () => {
 
   let items = (
     <>
-      {data?.map((p) => (
+      {data?.items.map((p) => (
         <SelectOption
           key={p.id}
           hasCheckbox
