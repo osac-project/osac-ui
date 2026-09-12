@@ -6,7 +6,7 @@ require (
 	connectrpc.com/vanguard v0.4.0
 	github.com/andybalholm/brotli v1.2.1
 	github.com/go-chi/chi/v5 v5.3.0
-	github.com/sirupsen/logrus v1.9.4
+	github.com/sirupsen/logrus v1.10.2
 	golang.org/x/net v0.53.0
 	google.golang.org/grpc v1.82.0
 	google.golang.org/protobuf v1.36.11
