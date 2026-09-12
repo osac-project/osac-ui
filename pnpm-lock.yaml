@@ -157,8 +157,8 @@ importers:
   libs/types:
     dependencies:
       '@bufbuild/protobuf':
-        specifier: 2.12.0
-        version: 2.12.0
+        specifier: 2.14.1
+        version: 2.14.1
     devDependencies:
       '@bufbuild/buf':
         specifier: 1.70.0
@@ -389,6 +389,9 @@ packages:
 
   '@bufbuild/protobuf@2.12.0':
     resolution: {integrity: sha512-B/XlCaFIP8LOwzo+bz5uFzATYokcwCKQcghqnlfwSmM5eX/qTkvDBnDPs+gXtX/RyjxJ4DRikECcPJbyALA8FA==}
+
+  '@bufbuild/protobuf@2.14.1':
+    resolution: {integrity: sha512-agRJn3+EJDUe8AvxTx/LnHA/GErvLE62pSaSk7+MwFOtOv8eWBu/qCq2qoZjBjVZ3C2aiFJCveuSs17KMkYGOw==}
 
   '@connectrpc/connect-web@2.1.2':
     resolution: {integrity: sha512-1tfaK85MU+gJjwwmL31d2rzdf0XCYX99chZf63uG89SGBUd4XuZ4ZzhGo2u79TPXOE6nLIZQ2okrpyey42PYdg==}
@@ -1927,6 +1930,7 @@ packages:
   eslint@9.39.4:
     resolution: {integrity: sha512-XoMjdBOwe/esVgEvLmNsD3IRHkm7fbKIUGvrleloJXUZgDHig2IPWNniv+GwjyJXzuNqVjlr5+4yVUZjycJwfQ==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+    deprecated: This version is no longer supported. Please see https://eslint.org/version-support for other options.
     hasBin: true
     peerDependencies:
       jiti: '*'
@@ -3789,6 +3793,8 @@ snapshots:
       '@bufbuild/buf-win32-x64': 1.70.0
 
   '@bufbuild/protobuf@2.12.0': {}
+
+  '@bufbuild/protobuf@2.14.1': {}
 
   '@connectrpc/connect-web@2.1.2(@bufbuild/protobuf@2.12.0)(@connectrpc/connect@2.1.2(@bufbuild/protobuf@2.12.0))':
     dependencies:
