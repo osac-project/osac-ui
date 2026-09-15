@@ -41,6 +41,17 @@ const ShellRoute = ({ children }: { children: ReactNode }) => {
   return <ErrorBoundary key={pathname}>{children}</ErrorBoundary>;
 };
 
+/** Redirects cloud-provider-admin users away from tenant-only creation routes. */
+const TenantOnlyRoute = ({ children }: { children: ReactNode }) => {
+  const { role } = useSession();
+
+  if (role === 'admin') {
+    return <Navigate to={defaultRouteForRole(role)} replace />;
+  }
+
+  return <>{children}</>;
+};
+
 export const AppShell = ({ logout }: { logout: () => Promise<void> }) => {
   const { role } = useSession();
   const { t } = useTranslation();
@@ -165,9 +176,11 @@ export const AppShell = ({ logout }: { logout: () => Promise<void> }) => {
         <Route
           path="/vms/create/:catalogItemId?"
           element={
-            <ShellRoute>
-              <VmCreatePage />
-            </ShellRoute>
+            <TenantOnlyRoute>
+              <ShellRoute>
+                <VmCreatePage />
+              </ShellRoute>
+            </TenantOnlyRoute>
           }
         />
         <Route
