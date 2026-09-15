@@ -6,8 +6,7 @@ import type { BareMetalInstance } from '@osac/types';
 
 import BareMetalDeleteConfirmModal from './BareMetalDeleteConfirmModal';
 import BareMetalPowerConfirmModal from './BareMetalPowerConfirmModal';
-import { useBareMetalActions } from './useBareMetalActions';
-import type { BareMetalPowerAction } from '../../api/v1/baremetal-instance';
+import { useBareMetalPowerConfirmation } from './useBareMetalPowerConfirmation';
 import { useTranslation } from '../../hooks/useTranslation';
 
 interface BareMetalActionsMenuProps {
@@ -19,44 +18,19 @@ export const BareMetalActionsMenu = ({ instance, onDeleted }: BareMetalActionsMe
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
-  const [powerAction, setPowerAction] = useState<BareMetalPowerAction | null>(null);
 
   const {
     canStart,
     canStop,
     canRestart,
     canDelete,
-    start,
-    stop,
-    restart,
+    powerAction,
+    openPowerAction,
+    closePowerAction,
+    confirmPowerAction,
     isPending: isPowerActionPending,
     error: powerActionError,
-    reset: resetPowerAction,
-  } = useBareMetalActions(instance);
-
-  const closePowerAction = () => {
-    resetPowerAction();
-    setPowerAction(null);
-  };
-
-  const confirmPowerAction = () => {
-    if (!powerAction) {
-      return;
-    }
-
-    resetPowerAction();
-    switch (powerAction) {
-      case 'start':
-        start({ onSuccess: closePowerAction });
-        break;
-      case 'stop':
-        stop({ onSuccess: closePowerAction });
-        break;
-      case 'restart':
-        restart({ onSuccess: closePowerAction });
-        break;
-    }
-  };
+  } = useBareMetalPowerConfirmation(instance);
 
   return (
     <>
@@ -99,7 +73,7 @@ export const BareMetalActionsMenu = ({ instance, onDeleted }: BareMetalActionsMe
             isDisabled={!canStart}
             onClick={() => {
               if (canStart) {
-                setPowerAction('start');
+                openPowerAction('start');
                 setOpen(false);
               }
             }}
@@ -110,7 +84,7 @@ export const BareMetalActionsMenu = ({ instance, onDeleted }: BareMetalActionsMe
             isDisabled={!canStop}
             onClick={() => {
               if (canStop) {
-                setPowerAction('stop');
+                openPowerAction('stop');
                 setOpen(false);
               }
             }}
@@ -121,7 +95,7 @@ export const BareMetalActionsMenu = ({ instance, onDeleted }: BareMetalActionsMe
             isDisabled={!canRestart}
             onClick={() => {
               if (canRestart) {
-                setPowerAction('restart');
+                openPowerAction('restart');
                 setOpen(false);
               }
             }}

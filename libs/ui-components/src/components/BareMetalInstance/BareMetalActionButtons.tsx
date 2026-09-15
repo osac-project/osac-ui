@@ -10,8 +10,7 @@ import type { BareMetalInstance } from '@osac/types';
 
 import BareMetalDeleteConfirmModal from './BareMetalDeleteConfirmModal';
 import BareMetalPowerConfirmModal from './BareMetalPowerConfirmModal';
-import { useBareMetalActions } from './useBareMetalActions';
-import type { BareMetalPowerAction } from '../../api/v1/baremetal-instance';
+import { useBareMetalPowerConfirmation } from './useBareMetalPowerConfirmation';
 import { useTranslation } from '../../hooks/useTranslation';
 
 interface BareMetalActionButtonsProps {
@@ -22,44 +21,19 @@ const BareMetalActionButtons = ({ instance }: BareMetalActionButtonsProps) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [deleteOpen, setDeleteOpen] = useState(false);
-  const [powerAction, setPowerAction] = useState<BareMetalPowerAction | null>(null);
 
   const {
     canStart,
     canStop,
     canRestart,
     canDelete,
-    start,
-    stop,
-    restart,
+    powerAction,
+    openPowerAction,
+    closePowerAction,
+    confirmPowerAction,
     isPending: isPowerActionPending,
     error: powerActionError,
-    reset: resetPowerAction,
-  } = useBareMetalActions(instance);
-
-  const closePowerAction = () => {
-    resetPowerAction();
-    setPowerAction(null);
-  };
-
-  const confirmPowerAction = () => {
-    if (!powerAction) {
-      return;
-    }
-
-    resetPowerAction();
-    switch (powerAction) {
-      case 'start':
-        start({ onSuccess: closePowerAction });
-        break;
-      case 'stop':
-        stop({ onSuccess: closePowerAction });
-        break;
-      case 'restart':
-        restart({ onSuccess: closePowerAction });
-        break;
-    }
-  };
+  } = useBareMetalPowerConfirmation(instance);
 
   return (
     <>
@@ -90,7 +64,7 @@ const BareMetalActionButtons = ({ instance }: BareMetalActionButtonsProps) => {
           isDisabled={!canStart}
           onClick={() => {
             if (canStart) {
-              setPowerAction('start');
+              openPowerAction('start');
             }
           }}
         >
@@ -102,7 +76,7 @@ const BareMetalActionButtons = ({ instance }: BareMetalActionButtonsProps) => {
           isDisabled={!canStop}
           onClick={() => {
             if (canStop) {
-              setPowerAction('stop');
+              openPowerAction('stop');
             }
           }}
         >
@@ -114,7 +88,7 @@ const BareMetalActionButtons = ({ instance }: BareMetalActionButtonsProps) => {
           isDisabled={!canRestart}
           onClick={() => {
             if (canRestart) {
-              setPowerAction('restart');
+              openPowerAction('restart');
             }
           }}
         >

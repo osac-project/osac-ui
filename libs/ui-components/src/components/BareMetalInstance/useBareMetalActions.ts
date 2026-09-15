@@ -20,12 +20,7 @@ export const useBareMetalActions = (instance: BareMetalInstance) => {
   const canDelete = state !== BareMetalInstanceState.DELETING;
 
   const mutate = (input: PatchBareMetalInstanceInput, options?: BareMetalActionOptions) => {
-    if (options) {
-      patch.mutate(input, options);
-      return;
-    }
-
-    patch.mutate(input);
+    patch.mutate(input, options);
   };
 
   const start = (options?: BareMetalActionOptions) => {
