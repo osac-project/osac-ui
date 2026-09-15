@@ -9,7 +9,8 @@ import SyncAltIcon from '@patternfly/react-icons/dist/esm/icons/sync-alt-icon';
 import type { BareMetalInstance } from '@osac/types';
 
 import BareMetalDeleteConfirmModal from './BareMetalDeleteConfirmModal';
-import { useBareMetalActions } from './useBareMetalActions';
+import BareMetalPowerConfirmModal from './BareMetalPowerConfirmModal';
+import { useBareMetalPowerConfirmation } from './useBareMetalPowerConfirmation';
 import { useTranslation } from '../../hooks/useTranslation';
 
 interface BareMetalActionButtonsProps {
@@ -21,11 +22,30 @@ const BareMetalActionButtons = ({ instance }: BareMetalActionButtonsProps) => {
   const navigate = useNavigate();
   const [deleteOpen, setDeleteOpen] = useState(false);
 
-  const { canStart, canStop, canRestart, canDelete, start, stop, restart } =
-    useBareMetalActions(instance);
+  const {
+    canStart,
+    canStop,
+    canRestart,
+    canDelete,
+    powerAction,
+    openPowerAction,
+    closePowerAction,
+    confirmPowerAction,
+    isPending: isPowerActionPending,
+    error: powerActionError,
+  } = useBareMetalPowerConfirmation(instance);
 
   return (
     <>
+      {powerAction && (
+        <BareMetalPowerConfirmModal
+          action={powerAction}
+          error={powerActionError}
+          isPending={isPowerActionPending}
+          onClose={closePowerAction}
+          onConfirm={confirmPowerAction}
+        />
+      )}
       {deleteOpen && (
         <BareMetalDeleteConfirmModal
           instance={instance}
@@ -38,17 +58,39 @@ const BareMetalActionButtons = ({ instance }: BareMetalActionButtonsProps) => {
         spaceItems={{ default: 'spaceItemsSm' }}
         flexWrap={{ default: 'wrap' }}
       >
-        <Button variant="primary" icon={<PlayIcon />} isDisabled={!canStart} onClick={start}>
+        <Button
+          variant="primary"
+          icon={<PlayIcon />}
+          isDisabled={!canStart}
+          onClick={() => {
+            if (canStart) {
+              openPowerAction('start');
+            }
+          }}
+        >
           {t('Start')}
         </Button>
-        <Button variant="secondary" icon={<StopIcon />} isDisabled={!canStop} onClick={stop}>
+        <Button
+          variant="secondary"
+          icon={<StopIcon />}
+          isDisabled={!canStop}
+          onClick={() => {
+            if (canStop) {
+              openPowerAction('stop');
+            }
+          }}
+        >
           {t('Stop')}
         </Button>
         <Button
           variant="secondary"
           icon={<SyncAltIcon />}
           isDisabled={!canRestart}
-          onClick={restart}
+          onClick={() => {
+            if (canRestart) {
+              openPowerAction('restart');
+            }
+          }}
         >
           {t('Restart')}
         </Button>

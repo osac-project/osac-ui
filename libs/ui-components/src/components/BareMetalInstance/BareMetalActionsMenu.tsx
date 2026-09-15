@@ -5,7 +5,8 @@ import { EllipsisVIcon } from '@patternfly/react-icons/dist/esm/icons/ellipsis-v
 import type { BareMetalInstance } from '@osac/types';
 
 import BareMetalDeleteConfirmModal from './BareMetalDeleteConfirmModal';
-import { useBareMetalActions } from './useBareMetalActions';
+import BareMetalPowerConfirmModal from './BareMetalPowerConfirmModal';
+import { useBareMetalPowerConfirmation } from './useBareMetalPowerConfirmation';
 import { useTranslation } from '../../hooks/useTranslation';
 
 interface BareMetalActionsMenuProps {
@@ -18,11 +19,30 @@ export const BareMetalActionsMenu = ({ instance, onDeleted }: BareMetalActionsMe
   const [open, setOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
 
-  const { canStart, canStop, canRestart, canDelete, start, stop, restart } =
-    useBareMetalActions(instance);
+  const {
+    canStart,
+    canStop,
+    canRestart,
+    canDelete,
+    powerAction,
+    openPowerAction,
+    closePowerAction,
+    confirmPowerAction,
+    isPending: isPowerActionPending,
+    error: powerActionError,
+  } = useBareMetalPowerConfirmation(instance);
 
   return (
     <>
+      {powerAction && (
+        <BareMetalPowerConfirmModal
+          action={powerAction}
+          error={powerActionError}
+          isPending={isPowerActionPending}
+          onClose={closePowerAction}
+          onConfirm={confirmPowerAction}
+        />
+      )}
       {deleteOpen && (
         <BareMetalDeleteConfirmModal
           instance={instance}
@@ -52,8 +72,10 @@ export const BareMetalActionsMenu = ({ instance, onDeleted }: BareMetalActionsMe
           <DropdownItem
             isDisabled={!canStart}
             onClick={() => {
-              start();
-              setOpen(false);
+              if (canStart) {
+                openPowerAction('start');
+                setOpen(false);
+              }
             }}
           >
             {t('Start')}
@@ -61,8 +83,10 @@ export const BareMetalActionsMenu = ({ instance, onDeleted }: BareMetalActionsMe
           <DropdownItem
             isDisabled={!canStop}
             onClick={() => {
-              stop();
-              setOpen(false);
+              if (canStop) {
+                openPowerAction('stop');
+                setOpen(false);
+              }
             }}
           >
             {t('Stop')}
@@ -70,8 +94,10 @@ export const BareMetalActionsMenu = ({ instance, onDeleted }: BareMetalActionsMe
           <DropdownItem
             isDisabled={!canRestart}
             onClick={() => {
-              restart();
-              setOpen(false);
+              if (canRestart) {
+                openPowerAction('restart');
+                setOpen(false);
+              }
             }}
           >
             {t('Restart')}
