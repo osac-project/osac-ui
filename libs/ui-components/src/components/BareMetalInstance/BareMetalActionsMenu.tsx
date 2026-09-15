@@ -5,7 +5,9 @@ import { EllipsisVIcon } from '@patternfly/react-icons/dist/esm/icons/ellipsis-v
 import type { BareMetalInstance } from '@osac/types';
 
 import BareMetalDeleteConfirmModal from './BareMetalDeleteConfirmModal';
+import BareMetalPowerConfirmModal from './BareMetalPowerConfirmModal';
 import { useBareMetalActions } from './useBareMetalActions';
+import type { BareMetalPowerAction } from '../../api/v1/baremetal-instance';
 import { useTranslation } from '../../hooks/useTranslation';
 
 interface BareMetalActionsMenuProps {
@@ -17,12 +19,56 @@ export const BareMetalActionsMenu = ({ instance, onDeleted }: BareMetalActionsMe
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [powerAction, setPowerAction] = useState<BareMetalPowerAction | null>(null);
 
-  const { canStart, canStop, canRestart, canDelete, start, stop, restart } =
-    useBareMetalActions(instance);
+  const {
+    canStart,
+    canStop,
+    canRestart,
+    canDelete,
+    start,
+    stop,
+    restart,
+    isPending: isPowerActionPending,
+    error: powerActionError,
+    reset: resetPowerAction,
+  } = useBareMetalActions(instance);
+
+  const closePowerAction = () => {
+    resetPowerAction();
+    setPowerAction(null);
+  };
+
+  const confirmPowerAction = () => {
+    if (!powerAction) {
+      return;
+    }
+
+    resetPowerAction();
+    switch (powerAction) {
+      case 'start':
+        start({ onSuccess: closePowerAction });
+        break;
+      case 'stop':
+        stop({ onSuccess: closePowerAction });
+        break;
+      case 'restart':
+        restart({ onSuccess: closePowerAction });
+        break;
+    }
+  };
 
   return (
     <>
+      {powerAction && (
+        <BareMetalPowerConfirmModal
+          action={powerAction}
+          error={powerActionError}
+          isPending={isPowerActionPending}
+          onClose={closePowerAction}
+          onConfirm={confirmPowerAction}
+        />
+      )}
       {deleteOpen && (
         <BareMetalDeleteConfirmModal
           instance={instance}
@@ -52,8 +98,10 @@ export const BareMetalActionsMenu = ({ instance, onDeleted }: BareMetalActionsMe
           <DropdownItem
             isDisabled={!canStart}
             onClick={() => {
-              start();
-              setOpen(false);
+              if (canStart) {
+                setPowerAction('start');
+                setOpen(false);
+              }
             }}
           >
             {t('Start')}
@@ -61,8 +109,10 @@ export const BareMetalActionsMenu = ({ instance, onDeleted }: BareMetalActionsMe
           <DropdownItem
             isDisabled={!canStop}
             onClick={() => {
-              stop();
-              setOpen(false);
+              if (canStop) {
+                setPowerAction('stop');
+                setOpen(false);
+              }
             }}
           >
             {t('Stop')}
@@ -70,8 +120,10 @@ export const BareMetalActionsMenu = ({ instance, onDeleted }: BareMetalActionsMe
           <DropdownItem
             isDisabled={!canRestart}
             onClick={() => {
-              restart();
-              setOpen(false);
+              if (canRestart) {
+                setPowerAction('restart');
+                setOpen(false);
+              }
             }}
           >
             {t('Restart')}

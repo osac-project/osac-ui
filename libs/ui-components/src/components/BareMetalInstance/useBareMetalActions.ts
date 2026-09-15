@@ -1,7 +1,14 @@
 import type { BareMetalInstance } from '@osac/types';
 import { BareMetalInstanceState } from '@osac/types';
 
-import { usePatchBareMetalInstance } from '../../api/v1/baremetal-instance';
+import {
+  type PatchBareMetalInstanceInput,
+  usePatchBareMetalInstance,
+} from '../../api/v1/baremetal-instance';
+
+interface BareMetalActionOptions {
+  onSuccess?: () => void;
+}
 
 export const useBareMetalActions = (instance: BareMetalInstance) => {
   const patch = usePatchBareMetalInstance();
@@ -12,27 +19,50 @@ export const useBareMetalActions = (instance: BareMetalInstance) => {
   const canRestart = state === BareMetalInstanceState.RUNNING;
   const canDelete = state !== BareMetalInstanceState.DELETING;
 
-  const start = () => {
+  const mutate = (input: PatchBareMetalInstanceInput, options?: BareMetalActionOptions) => {
+    if (options) {
+      patch.mutate(input, options);
+      return;
+    }
+
+    patch.mutate(input);
+  };
+
+  const start = (options?: BareMetalActionOptions) => {
     if (canStart) {
-      patch.mutate({ id: instance.id, action: 'start' });
+      mutate({ id: instance.id, action: 'start' }, options);
     }
   };
 
-  const stop = () => {
+  const stop = (options?: BareMetalActionOptions) => {
     if (canStop) {
-      patch.mutate({ id: instance.id, action: 'stop' });
+      mutate({ id: instance.id, action: 'stop' }, options);
     }
   };
 
-  const restart = () => {
+  const restart = (options?: BareMetalActionOptions) => {
     if (canRestart) {
-      patch.mutate({
-        id: instance.id,
-        action: 'restart',
-        currentTrigger: instance.spec?.restartTrigger ?? 0n,
-      });
+      mutate(
+        {
+          id: instance.id,
+          action: 'restart',
+          currentTrigger: instance.spec?.restartTrigger ?? 0n,
+        },
+        options,
+      );
     }
   };
 
-  return { canStart, canStop, canRestart, canDelete, start, stop, restart };
+  return {
+    canStart,
+    canStop,
+    canRestart,
+    canDelete,
+    start,
+    stop,
+    restart,
+    isPending: patch.isPending,
+    error: patch.error,
+    reset: patch.reset,
+  };
 };
