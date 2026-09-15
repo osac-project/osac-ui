@@ -1,4 +1,10 @@
-import { Stack, StackItem, Title } from '@patternfly/react-core';
+import {
+  FormGroup,
+  Stack,
+  StackItem,
+  TextInput,
+  Title,
+} from '@patternfly/react-core';
 
 import NameField from '@osac/ui-components/components/catalogProvision/wizard/fields/NameField';
 import { InputField } from '@osac/ui-components/components/Form/InputField';
@@ -8,9 +14,10 @@ import { useTranslation } from '../../../../hooks/useTranslation';
 
 interface IdpGeneralStepProps {
   isEdit: boolean;
+  tenant?: string;
 }
 
-const IdpGeneralStep = ({ isEdit }: IdpGeneralStepProps) => {
+const IdpGeneralStep = ({ isEdit, tenant }: IdpGeneralStepProps) => {
   const { t } = useTranslation();
   return (
     <Stack hasGutter>
@@ -35,6 +42,16 @@ const IdpGeneralStep = ({ isEdit }: IdpGeneralStepProps) => {
             multiline
             rows={3}
           />
+          {isEdit && tenant && (
+            <FormGroup label={t('Tenant')} fieldId="idp-tenant">
+              <TextInput
+                id="idp-tenant"
+                value={tenant}
+                isDisabled
+                aria-label={t('Tenant')}
+              />
+            </FormGroup>
+          )}
         </OsacForm>
       </StackItem>
     </Stack>
