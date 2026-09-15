@@ -1,0 +1,323 @@
+---
+description: Code review prevention rules derived from recurring review feedback in osac-project/osac-ui. Complements AGENTS.md with patterns that human and automated reviewers have repeatedly flagged.
+globs: **/*.{ts,tsx}
+alwaysApply: false
+---
+
+# Code Review Prevention Rules
+
+These rules are derived from actual code review feedback across osac-project/osac-ui pull requests.
+They complement AGENTS.md — read that first for foundational conventions.
+
+## 1. API Data Integrity
+
+### Never assume list responses are complete
+
+When you need a specific resource, fetch it by ID rather than filtering a list response.
+List endpoints may paginate, return stale data, or omit items.
+
+```typescript
+// ❌ BAD — assumes the list contains the resource
+const subnets = await listSubnets({});
+const target = subnets.find(s => s.id === subnetId);
+
+// ✅ GOOD — fetch by ID when you need a specific resource
+const target = await getSubnet({ id: subnetId });
+```
+
+When you must use a list, handle pagination or document why truncation is acceptable.
+
+## 2. Duplicate Submission Protection
+
+### Guard buttons and forms against rapid double-clicks
+
+Async validation in `onSubmit` creates a window where users can click twice.
+Use a synchronous ref to block reentry before the async work begins.
+
+```typescript
+// ✅ Pattern: synchronous submission guard
+const submittingRef = useRef(false);
+
+const handleSubmit = async (values: FormValues) => {
+  if (submittingRef.current) return;
+  submittingRef.current = true;
+  try {
+    await createResource(values);
+    onClose();
+  } catch (err) {
+    setError(err);
+  } finally {
+    submittingRef.current = false;
+  }
+};
+```
+
+This is especially important for creation wizards and modal forms.
+
+## 3. Internationalization (i18n) — Key Format
+
+### Always use static literal keys with `t()`
+
+Translation keys must be static string literals so extraction tooling can find them.
+Never pass variables or template literals to `t()`.
+
+```typescript
+// ❌ BAD — dynamic key defeats extraction
+const label = t(statusMap[status]);
+const msg = t(`Error: ${detail}`);
+
+// ✅ GOOD — static literal keys
+const label = t('Status active');
+const msg = t('Error creating resource');
+```
+
+### Parameterize with interpolation, not concatenation
+
+```typescript
+// ❌ BAD — concatenation breaks translation
+t('Created ') + count + t(' resources')
+
+// ✅ GOOD — use i18next interpolation
+t('Created {{count}} resources', { count })
+```
+
+### Translate every user-visible string
+
+Labels, placeholders, error messages, tooltips, aria-labels, empty-state text,
+and helper text must all go through `t()`. If it appears on screen, it must be translatable.
+
+## 4. Type Safety in Tests
+
+### Use protobuf `create()` for test fixtures, not type casts
+
+Generated protobuf message types have a `create()` factory. Use it instead of
+casting partial objects.
+
+```typescript
+// ❌ BAD — bypasses type checking, hides missing required fields
+const mockSubnet = { id: '1', name: 'test' } as Subnet;
+
+// ❌ ALSO BAD — double cast obscures intent
+const mockSubnet = { id: '1' } as unknown as Subnet;
+
+// ✅ GOOD — uses generated factory, catches schema changes at compile time
+import { create } from '@bufbuild/protobuf';
+import { SubnetSchema } from '@osac/types';
+
+const mockSubnet = create(SubnetSchema, {
+  id: '1',
+  name: 'test',
+  cidr: '10.0.0.0/24',
+});
+```
+
+### Runtime type guards before method calls
+
+When a value could be `undefined` or a non-string type, check before calling string methods.
+
+```typescript
+// ❌ BAD — crashes if field is undefined
+const trimmed = response.name.trim();
+
+// ✅ GOOD — guard the type
+const trimmed = typeof response.name === 'string' ? response.name.trim() : '';
+```
+
+## 5. Workflow Precondition Guards
+
+### Disable actions when preconditions are not met
+
+Before enabling a submit button or action, verify the operation is valid.
+Check for conflicts, already-attached resources, and required prior steps.
+
+```typescript
+// ✅ Pattern: check preconditions and surface them to the user
+const isAlreadyAttached = existingGateway?.subnetId === selectedSubnetId;
+
+<Button
+  isDisabled={isSubmitting || isAlreadyAttached}
+  onClick={handleAttach}
+>
+  {t('Attach')}
+</Button>
+
+{isAlreadyAttached && (
+  <HelperText>
+    <HelperTextItem variant="warning">
+      {t('This NAT gateway is already attached to the selected subnet.')}
+    </HelperTextItem>
+  </HelperText>
+)}
+```
+
+## 6. Error State Propagation
+
+### Pass error states through the full component tree
+
+When a fetch or mutation can fail, propagate the error state to disable
+dependent controls and show feedback.
+
+```typescript
+// ❌ BAD — error exists but Next button stays enabled
+const { data, error } = useApiQuery(listItems);
+return <WizardStep>{/* ... */}</WizardStep>;
+
+// ✅ GOOD — error disables progression
+const { data, error } = useApiQuery(listItems);
+return (
+  <WizardStep isDisabled={!!error}>
+    {error && <Alert variant="danger" title={t('Failed to load items')} />}
+    {/* ... */}
+  </WizardStep>
+);
+```
+
+## 7. Input Validation Edge Cases
+
+### Validate non-canonical input formats
+
+Users paste values from other systems. Validate that input is in canonical form
+and reject or normalize ambiguous formats.
+
+```typescript
+// ✅ Example: reject non-canonical IPv6 prefix
+const isValidCidr = (value: string): boolean => {
+  // Reject octal-looking segments like "064" that could be misinterpreted
+  if (/\b0\d+\b/.test(value.split('/')[0])) {
+    return false;
+  }
+  // ... standard CIDR validation
+};
+```
+
+### Trim and normalize before comparison
+
+```typescript
+// ❌ BAD — whitespace causes silent mismatches
+if (input === expected) { ... }
+
+// ✅ GOOD — normalize both sides
+if (input.trim() === expected.trim()) { ... }
+```
+
+## 8. Identity-Based Matching
+
+### Never match array items by index — use identity fields
+
+When correlating data across arrays (e.g., statuses with resources),
+match by a stable identity field, not by position.
+
+```typescript
+// ❌ BAD — assumes arrays are in the same order
+const status = statusList[index];
+
+// ✅ GOOD — match by identity
+const status = statusList.find(s => s.resourceId === resource.id);
+```
+
+This applies to network attachment statuses, node set statuses, and
+any paired arrays from different API responses.
+
+## 9. Fallback Display Values
+
+### Show IDs when names are not yet loaded
+
+When displaying a resource reference and the friendly name requires
+a separate lookup that may not have completed, show the ID as a fallback.
+
+```typescript
+// ❌ BAD — shows nothing while loading
+<span>{subnetName}</span>
+
+// ✅ GOOD — ID is always available as fallback
+<span>{subnetName || subnetId}</span>
+
+// ✅ ALSO GOOD — explicit loading state
+<span>{isLoading ? subnetId : subnetName}</span>
+```
+
+## 10. UI Consistency
+
+### Use the correct PatternFly button variant
+
+Follow these conventions for button hierarchy:
+
+| Context | Variant | Example |
+|---------|---------|---------|
+| Primary page action | `primary` | Create, Save |
+| Secondary/alternative action | `secondary` | Cancel, Back |
+| Inline add/remove in lists | `link` with icon | + Add item |
+| Destructive action | `danger` | Delete, Remove |
+
+### Consistent action labels
+
+Use verb-first labels that match the operation:
+
+```typescript
+// ❌ BAD — ambiguous or inconsistent
+t('Submit')
+t('OK')
+t('+ Subnet')
+
+// ✅ GOOD — clear verb + object
+t('Create cluster')
+t('Attach NAT gateway')
+t('Add subnet')
+```
+
+## 11. Consistent Formatting
+
+### Use shared formatters for display values
+
+When the same kind of value appears in multiple places (tables, detail views,
+status chips), use a shared formatter function to ensure consistency.
+
+```typescript
+// ✅ Define once, use everywhere
+// utils/formatters.ts
+export const formatResourceStatus = (status: ResourceStatus): string => {
+  const statusMap: Record<ResourceStatus, string> = {
+    [ResourceStatus.ACTIVE]: t('Active'),
+    [ResourceStatus.PENDING]: t('Pending'),
+    [ResourceStatus.ERROR]: t('Error'),
+  };
+  return statusMap[status] ?? t('Unknown');
+};
+```
+
+Never hardcode display logic for status values, dates, or sizes inline
+in components — extract to a shared utility.
+
+## 12. Protobuf Schema Constraints
+
+### Encode mutual exclusion at the schema level
+
+When fields are mutually exclusive (e.g., a resource is either type A or type B),
+use protobuf `oneof` rather than multiple optional fields with runtime validation.
+
+If the protobuf schema doesn't enforce mutual exclusion yet, add a runtime guard
+and document the constraint with a TODO to fix the schema.
+
+```typescript
+// ✅ Runtime guard when schema doesn't enforce exclusivity
+if (values.typeA && values.typeB) {
+  throw new Error('typeA and typeB are mutually exclusive');
+}
+// TODO: Convert to protobuf oneof in fulfillment-service API
+```
+
+## Pre-Submit Checklist
+
+Before opening a PR, verify each item:
+
+- [ ] API calls: Am I fetching by ID when I need a specific resource?
+- [ ] Double-click: Are create/submit handlers guarded against reentry?
+- [ ] i18n: Are ALL user-visible strings wrapped in `t()` with static literal keys?
+- [ ] Types: Am I using `create(Schema, {...})` for test fixtures, not type casts?
+- [ ] Guards: Are buttons/actions disabled when preconditions aren't met?
+- [ ] Errors: Do error states propagate to disable dependent UI controls?
+- [ ] Validation: Does input validation handle edge cases and non-canonical formats?
+- [ ] Matching: Am I matching array items by identity, not by position?
+- [ ] Fallbacks: Do I show IDs as fallback when names aren't loaded yet?
+- [ ] Formatting: Am I using shared formatters for repeated display values?
+- [ ] Buttons: Do button variants and labels follow the hierarchy conventions?

@@ -45,7 +45,8 @@ coverage/
 # Go proxy build artifact
 proxy/osac-proxy
 
-.cursor/
+.cursor/*
+!.cursor/rules/
 
 # AI workflow artifacts
 .artifacts/
