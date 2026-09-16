@@ -108,7 +108,7 @@ export const CatalogStep = <TValues extends { catalogItemId: string }, TPayload>
       <StackItem>
         <Gallery
           hasGutter
-          minWidths={{ default: '200px' }}
+          minWidths={{ default: '300px' }}
           role="radiogroup"
           aria-label={t('catalogProvision.steps.catalog.title')}
         >

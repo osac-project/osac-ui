@@ -1,4 +1,3 @@
-import { useNavigate } from 'react-router-dom';
 import {
   Bullseye,
   Gallery,
@@ -9,20 +8,20 @@ import {
   Title,
 } from '@patternfly/react-core';
 
+import { type Tenant } from '@osac/types/private';
+import { ViewType } from '@osac/ui-components/hooks/use-view-switcher';
+
 import CatalogItemCard from './CatalogItemCard';
-import type { CatalogItem } from './catalogItemDisplay';
+import { type CatalogItem } from './catalogItemDisplay';
+import CatalogItemTable from './CatalogItemTable';
 import { getErrorMessage } from '../../utils/error';
 import QueryErrorState from '../Resource/QueryErrorState';
-
-const itemRoute: Record<CatalogItem['$typeName'], string> = {
-  'osac.public.v1.ClusterCatalogItem': 'cluster',
-  'osac.public.v1.BareMetalInstanceCatalogItem': 'bm',
-  'osac.public.v1.ComputeInstanceCatalogItem': 'vm',
-};
 
 interface CatalogItemListSectionProps {
   title?: string;
   items: CatalogItem[];
+  tenants?: Tenant[];
+  viewType: ViewType;
   isLoading?: boolean;
   error?: unknown;
 }
@@ -30,53 +29,51 @@ interface CatalogItemListSectionProps {
 export const CatalogItemListSection = ({
   title,
   items,
+  tenants = [],
+  viewType,
   isLoading = false,
   error = null,
 }: CatalogItemListSectionProps) => {
-  const navigate = useNavigate();
   if (!isLoading && !error && items.length === 0) {
     return null;
   }
 
   return (
-    <StackItem>
-      <Stack hasGutter>
-        {title ? (
-          <StackItem>
-            <Title headingLevel="h2" size="lg">
-              {title}
-            </Title>
-          </StackItem>
-        ) : null}
-        {isLoading ? (
-          <StackItem>
-            <Bullseye>
-              <Spinner aria-label={`Loading ${title}`} />
-            </Bullseye>
-          </StackItem>
-        ) : null}
-        {error ? (
-          <StackItem>
-            <QueryErrorState error={error} title={title} body={getErrorMessage(error)} />
-          </StackItem>
-        ) : null}
-        {items.length > 0 ? (
-          <StackItem>
+    <Stack hasGutter>
+      {title ? (
+        <StackItem>
+          <Title headingLevel="h2" size="lg">
+            {title}
+          </Title>
+        </StackItem>
+      ) : null}
+      {isLoading ? (
+        <StackItem>
+          <Bullseye>
+            <Spinner aria-label={`Loading ${title ?? ''}`} />
+          </Bullseye>
+        </StackItem>
+      ) : null}
+      {error ? (
+        <StackItem>
+          <QueryErrorState error={error} title={title} body={getErrorMessage(error)} />
+        </StackItem>
+      ) : null}
+      {items.length > 0 ? (
+        <StackItem>
+          {viewType === 'cards' ? (
             <Gallery hasGutter minWidths={{ default: '400px' }} maxWidths={{ default: '400px' }}>
               {items.map((item) => (
                 <GalleryItem key={item.id}>
-                  <CatalogItemCard
-                    item={item}
-                    onOpenDetails={() =>
-                      navigate(`/catalog/${itemRoute[item.$typeName]}/${item.id}`)
-                    }
-                  />
+                  <CatalogItemCard item={item} tenants={tenants} />
                 </GalleryItem>
               ))}
             </Gallery>
-          </StackItem>
-        ) : null}
-      </Stack>
-    </StackItem>
+          ) : (
+            <CatalogItemTable items={items} tenants={tenants} />
+          )}
+        </StackItem>
+      ) : null}
+    </Stack>
   );
 };

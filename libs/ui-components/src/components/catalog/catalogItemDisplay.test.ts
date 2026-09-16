@@ -1,10 +1,16 @@
 import { describe, expect, it } from 'vitest';
 
-import { ClusterCatalogItem } from '@osac/types';
+import type {
+  BareMetalInstanceCatalogItem,
+  ClusterCatalogItem,
+  ComputeInstanceCatalogItem,
+} from '@osac/types';
 
 import {
+  catalogItemDetailsPath,
   catalogItemResourceLine,
   catalogItemResourceParts,
+  filterCatalogItemsByPublished,
   filterCatalogItemsBySearch,
 } from './catalogItemDisplay';
 import {
@@ -203,6 +209,18 @@ describe('filterCatalogItemsBySearch', () => {
       templateParameters: {},
       published: true,
       template: undefined,
+      metadata: {
+        $typeName: 'osac.public.v1.Metadata',
+        displayName: '',
+        description: '',
+        name: 'alpha-vm',
+        creator: '',
+        annotations: {},
+        labels: {},
+        project: '',
+        tenant: '',
+        version: 1,
+      },
     },
     {
       $typeName: 'osac.public.v1.ClusterCatalogItem',
@@ -213,6 +231,18 @@ describe('filterCatalogItemsBySearch', () => {
       templateParameters: {},
       published: true,
       template: undefined,
+      metadata: {
+        $typeName: 'osac.public.v1.Metadata',
+        displayName: '',
+        description: '',
+        name: 'beta-cluster',
+        creator: '',
+        annotations: {},
+        labels: {},
+        project: '',
+        tenant: '',
+        version: 1,
+      },
     },
   ];
 
@@ -221,8 +251,68 @@ describe('filterCatalogItemsBySearch', () => {
     expect(filterCatalogItemsBySearch(items, '   ')).toEqual(items);
   });
 
-  it('filters case-insensitively across title and description', () => {
+  it('filters case-insensitively across name and description', () => {
     expect(filterCatalogItemsBySearch(items, 'alpha')).toEqual([items[0]]);
     expect(filterCatalogItemsBySearch(items, 'PRODUCTION')).toEqual([items[1]]);
+  });
+});
+
+describe('filterCatalogItemsByPublished', () => {
+  const items: ClusterCatalogItem[] = [
+    {
+      $typeName: 'osac.public.v1.ClusterCatalogItem',
+      id: '1',
+      title: 'Live cluster',
+      description: 'Published offering',
+      fieldDefinitions: [],
+      templateParameters: {},
+      published: true,
+      template: undefined,
+    },
+    {
+      $typeName: 'osac.public.v1.ClusterCatalogItem',
+      id: '2',
+      title: 'Draft cluster',
+      description: 'Unpublished offering',
+      fieldDefinitions: [],
+      templateParameters: {},
+      published: false,
+      template: undefined,
+    },
+  ];
+
+  it('returns all items when no publication filter is selected', () => {
+    expect(filterCatalogItemsByPublished(items, undefined)).toEqual(items);
+  });
+
+  it('returns only published items when the published filter is selected', () => {
+    expect(filterCatalogItemsByPublished(items, 'published')).toEqual([items[0]]);
+  });
+
+  it('returns only unpublished items when the unpublished filter is selected', () => {
+    expect(filterCatalogItemsByPublished(items, 'unpublished')).toEqual([items[1]]);
+  });
+});
+
+describe('catalogItemDetailsPath', () => {
+  it('builds the details path for each catalog item type', () => {
+    expect(
+      catalogItemDetailsPath({
+        $typeName: 'osac.public.v1.ComputeInstanceCatalogItem',
+        id: 'vm-1',
+      } as ComputeInstanceCatalogItem),
+    ).toBe('/catalog/vm/vm-1');
+    expect(
+      catalogItemDetailsPath({
+        $typeName: 'osac.public.v1.BareMetalInstanceCatalogItem',
+        id: 'bm-1',
+      } as BareMetalInstanceCatalogItem),
+    ).toBe('/catalog/bm/bm-1');
+    expect(
+      catalogItemDetailsPath({
+        $typeName: 'osac.public.v1.ClusterCatalogItem',
+        id: 'cluster-1',
+      } as ClusterCatalogItem),
+    ).toBe('/catalog/cluster/cluster-1');
   });
 });
