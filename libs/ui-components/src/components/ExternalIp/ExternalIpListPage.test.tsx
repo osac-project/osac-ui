@@ -78,6 +78,7 @@ const renderPage = (
   externalIps: ExternalIP[] = defaultIps,
   attachments: ExternalIPAttachment[] = defaultAttachments,
   natGateways: NATGateway[] = [],
+  routerEntries?: string[],
 ) =>
   renderWithProviders(
     <SessionProvider role="tenant-user" username="test-user" tenantId="test-tenant">
@@ -98,6 +99,7 @@ const renderPage = (
           } as Project,
         ],
       },
+      routerEntries,
     },
   );
 
@@ -160,6 +162,17 @@ describe('ExternalIpListPage', () => {
       ).toBeInTheDocument();
     });
     expect(screen.queryByRole('table')).not.toBeInTheDocument();
+  });
+
+  it('shows a filtered empty state when a project filter has no results', async () => {
+    renderPage([], defaultAttachments, [], ['/networking/external-ips?project=default']);
+
+    await waitFor(() => {
+      expect(screen.getByText('No external IPs match your search.')).toBeInTheDocument();
+    });
+    expect(
+      screen.queryByText('No external IPs yet. Create one to get started.'),
+    ).not.toBeInTheDocument();
   });
 
   it('links Create external IP to the create route', () => {

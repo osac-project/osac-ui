@@ -75,7 +75,7 @@ const ExternalIpListPage = () => {
         </Toolbar>
         {externalIps.length === 0 ? (
           <SubtleContent component="p">
-            {search
+            {search || projectFilter
               ? t('No external IPs match your search.')
               : t('No external IPs yet. Create one to get started.')}
           </SubtleContent>

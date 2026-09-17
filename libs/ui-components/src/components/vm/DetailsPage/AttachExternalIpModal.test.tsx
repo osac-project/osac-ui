@@ -79,7 +79,9 @@ describe('AttachExternalIpModal', () => {
     );
     expect(createRequest?.object?.spec?.target.case).toBe('computeInstance');
     expect(createRequest?.object?.spec?.target.value?.id).toBe('vm-1');
-    expect(onSuccess).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(onSuccess).toHaveBeenCalled();
+    });
   });
 
   it('does not list attached external IPs', async () => {
