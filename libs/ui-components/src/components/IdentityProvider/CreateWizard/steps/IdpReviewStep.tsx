@@ -12,7 +12,11 @@ import { useFormikContext } from 'formik';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import { IdentityProviderValues } from '../values';
 
-const IdpReviewStep = () => {
+interface IdpReviewStepProps {
+  tenant?: string;
+}
+
+const IdpReviewStep = ({ tenant }: IdpReviewStepProps) => {
   const { t } = useTranslation();
   const { values } = useFormikContext<IdentityProviderValues>();
 
@@ -39,6 +43,12 @@ const IdpReviewStep = () => {
               {values.spec.description || '-'}
             </DescriptionListDescription>
           </DescriptionListGroup>
+          {tenant && (
+            <DescriptionListGroup>
+              <DescriptionListTerm>{t('Tenant')}</DescriptionListTerm>
+              <DescriptionListDescription>{tenant}</DescriptionListDescription>
+            </DescriptionListGroup>
+          )}
 
           <DescriptionListGroup>
             <DescriptionListTerm>{t('Client ID')}</DescriptionListTerm>
