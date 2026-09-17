@@ -111,7 +111,7 @@ describe('ExternalIpListPage', () => {
   it('renders the page header', () => {
     renderPage();
 
-    expect(screen.getByText('Networking').closest('.pf-v6-c-label')).not.toBeNull();
+    expect(screen.queryByText('Networking')).not.toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'External IPs' })).toBeInTheDocument();
     expect(
       screen.getByText(

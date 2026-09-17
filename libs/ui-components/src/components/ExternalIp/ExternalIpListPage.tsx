@@ -42,7 +42,6 @@ const ExternalIpListPage = () => {
 
   return (
     <ListPage
-      label={t('Networking')}
       title={t('External IPs')}
       description={t(
         'Review provider-assigned IP pools and allocate external addresses for edge exposure.',

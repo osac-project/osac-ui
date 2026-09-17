@@ -1,5 +1,4 @@
 import {
-  Content,
   DescriptionList,
   DescriptionListDescription,
   DescriptionListGroup,
@@ -27,11 +26,6 @@ const ExternalIpReviewStep = () => {
         </Title>
       </StackItem>
       <StackItem>
-        <Content component="p">
-          {t('Review the automatically assigned external IP before creating it.')}
-        </Content>
-      </StackItem>
-      <StackItem>
         <DescriptionList isHorizontal isCompact aria-label={t('Review')}>
           <DescriptionListGroup>
             <DescriptionListTerm>{t('Project')}</DescriptionListTerm>
@@ -56,10 +50,6 @@ const ExternalIpReviewStep = () => {
             <DescriptionListDescription>
               {displayValue(values.pool.name || values.pool.id)}
             </DescriptionListDescription>
-          </DescriptionListGroup>
-          <DescriptionListGroup>
-            <DescriptionListTerm>{t('Address')}</DescriptionListTerm>
-            <DescriptionListDescription>{t('Assigned automatically')}</DescriptionListDescription>
           </DescriptionListGroup>
         </DescriptionList>
       </StackItem>
