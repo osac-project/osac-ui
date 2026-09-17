@@ -109,7 +109,7 @@ export const catalogItemConfigurationFieldDefinitions = (
   );
 };
 
-const formatCatalogResourcePart = (def: CatalogFieldDefinition): string | null => {
+export const formatCatalogResourcePart = (def: CatalogFieldDefinition): string | null => {
   if (!isCatalogCardResourceFieldPath(def.path)) {
     return null;
   }
@@ -152,7 +152,6 @@ export const searchableCatalogItemText = (item: CatalogItem): string => {
     .join(' ');
 
   return [
-    item.title,
     item.description,
     item.metadata?.name,
     fieldText,
@@ -171,6 +170,37 @@ export const filterCatalogItemsBySearch = (items: CatalogItem[], search: string)
   return items.filter((item) => searchableCatalogItemText(item).includes(searchTerm));
 };
 
+export type CatalogPublishedFilter = 'published' | 'unpublished';
+
+export const isCatalogPublishedFilter = (value: string): value is CatalogPublishedFilter =>
+  value === 'published' || value === 'unpublished';
+
+export const filterCatalogItemsByPublished = (
+  items: CatalogItem[],
+  publishedFilter: CatalogPublishedFilter | undefined,
+): CatalogItem[] => {
+  if (!publishedFilter) {
+    return items;
+  }
+  const wantPublished = publishedFilter === 'published';
+  return items.filter((item) => item.published === wantPublished);
+};
+
+export const GLOBAL_TENANT_VALUE = 'shared';
+
+export const filterCatalogItemsByTenant = (
+  items: CatalogItem[],
+  tenantFilter: string | undefined,
+): CatalogItem[] => {
+  if (!tenantFilter) {
+    return items;
+  }
+  return items.filter(
+    (item) =>
+      item.metadata?.tenant === GLOBAL_TENANT_VALUE || item.metadata?.tenant === tenantFilter,
+  );
+};
+
 export const formatCatalogFieldDefault = (def: CatalogFieldDefinition): string => {
   const defaultValue = resolvedFieldDefault(def);
   if (defaultValue === undefined) {
@@ -179,27 +209,28 @@ export const formatCatalogFieldDefault = (def: CatalogFieldDefinition): string =
   return fieldDefinitionDefaultToInputString(defaultValue) || '—';
 };
 
-export const getCatalogCreateAction = (item: CatalogItem, t: TFunction) => {
+export const getCatalogCreateActionPath = (item: CatalogItem) => {
   switch (item.$typeName) {
     case 'osac.public.v1.ComputeInstanceCatalogItem':
-      return {
-        label: t('Create virtual machine'),
-        path: `/vms/create/${item.id}`,
-      };
+      return `/vms/create/${item.id}`;
     case 'osac.public.v1.ClusterCatalogItem':
-      return {
-        label: t('Create cluster'),
-        path: `/clusters/create/${item.id}`,
-      };
+      return `/clusters/create/${item.id}`;
     case 'osac.public.v1.BareMetalInstanceCatalogItem':
-      return {
-        label: t('Provision bare metal'),
-        path: `/bare-metal/create/${item.id}`,
-      };
+      return `/bare-metal/create/${item.id}`;
     default:
-      return {
-        label: '',
-        path: '#',
-      };
+      return '#';
+  }
+};
+
+export const catalogItemDetailsPath = (item: CatalogItem): string => {
+  switch (item.$typeName) {
+    case 'osac.public.v1.ComputeInstanceCatalogItem':
+      return `/catalog/vm/${item.id}`;
+    case 'osac.public.v1.BareMetalInstanceCatalogItem':
+      return `/catalog/bm/${item.id}`;
+    case 'osac.public.v1.ClusterCatalogItem':
+      return `/catalog/cluster/${item.id}`;
+    default:
+      return '#';
   }
 };

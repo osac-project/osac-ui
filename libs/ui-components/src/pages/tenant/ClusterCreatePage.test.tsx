@@ -12,6 +12,7 @@ import {
 } from '@osac/types';
 
 import { ClusterCreatePage } from './ClusterCreatePage';
+import { SessionProvider } from '../../hooks/use-session';
 import type { MockApiFixtures } from '../../test-utils/createMockConnectTransport';
 import { renderWithProviders } from '../../test-utils/TestProviders';
 
@@ -214,13 +215,15 @@ describe('ClusterCreatePage', () => {
     });
 
     const { user } = renderWithProviders(
-      <Routes>
-        <Route path="/clusters/create" element={<ClusterCreatePage />} />
-        <Route
-          path="/clusters/:clusterId"
-          element={<div>Cluster details {createdCluster.id}</div>}
-        />
-      </Routes>,
+      <SessionProvider role="tenant-user" username="test-user" tenantId="test-tenant">
+        <Routes>
+          <Route path="/clusters/create" element={<ClusterCreatePage />} />
+          <Route
+            path="/clusters/:clusterId"
+            element={<div>Cluster details {createdCluster.id}</div>}
+          />
+        </Routes>
+      </SessionProvider>,
       {
         routerEntries: ['/clusters/create'],
         apiFixtures,
@@ -228,7 +231,7 @@ describe('ClusterCreatePage', () => {
       },
     );
 
-    await selectCatalogItem(user, clusterCatalogItem.title);
+    await selectCatalogItem(user, clusterCatalogItem.metadata?.name || '');
     await clickWizardNext(user);
     await fillClusterGeneralStep(user, 'my-cluster');
     await clickWizardNext(user);
