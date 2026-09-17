@@ -11,6 +11,7 @@ import type {
   AttachNatGatewayFormValues,
   AttachNatGatewayVirtualNetwork,
 } from './AttachNatGatewayWizard.types';
+import { CidrDisplay } from './CidrDisplay';
 import { useTranslation } from '../../hooks/useTranslation';
 
 export interface AttachNatGatewayReviewStepProps {
@@ -34,9 +35,14 @@ const AttachNatGatewayReviewStep = ({
         </DescriptionListDescription>
       </DescriptionListGroup>
       <DescriptionListGroup>
-        <DescriptionListTerm>{t('IPv4 CIDR')}</DescriptionListTerm>
+        <DescriptionListTerm>{t('CIDR')}</DescriptionListTerm>
         <DescriptionListDescription>
-          <code>{virtualNetwork.spec?.ipv4Cidr ?? '—'}</code>
+          <code>
+            <CidrDisplay
+              ipv4Cidr={virtualNetwork.spec?.ipv4Cidr}
+              ipv6Cidr={virtualNetwork.spec?.ipv6Cidr}
+            />
+          </code>
         </DescriptionListDescription>
       </DescriptionListGroup>
       <DescriptionListGroup>

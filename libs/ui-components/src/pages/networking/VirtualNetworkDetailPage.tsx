@@ -30,6 +30,7 @@ import {
   useVirtualNetwork,
   virtualNetworkScopeFilter,
 } from '../../api/v1/networking';
+import { CidrDisplay } from '../../components/networking/CidrDisplay';
 import { DetachNatGatewayModal } from '../../components/networking/DetachNatGatewayModal';
 import NatGatewayCard from '../../components/networking/NatGatewayCard';
 import { SecurityGroupCreateModal } from '../../components/networking/SecurityGroupCreateModal';
@@ -111,19 +112,14 @@ export const VirtualNetworkDetailPage = () => {
                   <CardBody>
                     <DescriptionList isHorizontal>
                       <DescriptionListGroup>
-                        <DescriptionListTerm>{t('IPv4 CIDR')}</DescriptionListTerm>
+                        <DescriptionListTerm>{t('CIDR')}</DescriptionListTerm>
                         <DescriptionListDescription>
-                          {vn?.spec?.ipv4Cidr ?? '—'}
+                          <CidrDisplay
+                            ipv4Cidr={vn?.spec?.ipv4Cidr}
+                            ipv6Cidr={vn?.spec?.ipv6Cidr}
+                          />
                         </DescriptionListDescription>
                       </DescriptionListGroup>
-                      {vn?.spec?.ipv6Cidr && (
-                        <DescriptionListGroup>
-                          <DescriptionListTerm>{t('IPv6 CIDR')}</DescriptionListTerm>
-                          <DescriptionListDescription>
-                            {vn.spec.ipv6Cidr}
-                          </DescriptionListDescription>
-                        </DescriptionListGroup>
-                      )}
                       <DescriptionListGroup>
                         <DescriptionListTerm>{t('Status')}</DescriptionListTerm>
                         <DescriptionListDescription>
@@ -186,7 +182,12 @@ export const VirtualNetworkDetailPage = () => {
                               <Td dataLabel="Status">
                                 <SubnetStatusLabel state={subnet.status?.state} />
                               </Td>
-                              <Td dataLabel="CIDR">{subnet.spec?.ipv4Cidr ?? '—'}</Td>
+                              <Td dataLabel="CIDR">
+                                <CidrDisplay
+                                  ipv4Cidr={subnet.spec?.ipv4Cidr}
+                                  ipv6Cidr={subnet.spec?.ipv6Cidr}
+                                />
+                              </Td>
                             </Tr>
                           ))}
                         </Tbody>
