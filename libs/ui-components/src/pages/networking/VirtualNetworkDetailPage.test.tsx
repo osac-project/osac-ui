@@ -180,4 +180,40 @@ describe('VirtualNetworkDetailPage', () => {
     await user.click(screen.getByRole('button', { name: 'Actions for NAT gateway attachment' }));
     expect(screen.getByRole('menuitem', { name: 'Delete' })).toBeDisabled();
   });
+
+  it('shows IPv6 CIDR for an IPv6-only virtual network', async () => {
+    const ipv6OnlyVN = {
+      ...mockVN,
+      spec: { ipv4Cidr: '', ipv6Cidr: 'fd00::/48' },
+    } as VirtualNetwork;
+
+    renderPage({ virtualNetworks: [ipv6OnlyVN] });
+
+    expect(await screen.findByText('fd00::/48')).toBeInTheDocument();
+  });
+
+  it('shows IPv6 CIDR for an IPv6-only subnet', async () => {
+    const ipv6OnlySubnet = {
+      id: 'subnet-v6',
+      metadata: { name: 'subnet-v6' },
+      spec: { ipv6Cidr: 'fd00:1::/64', virtualNetwork: { id: 'vn-1' } },
+      status: { state: SubnetState.READY },
+    } as Subnet;
+
+    renderPage({ subnets: [ipv6OnlySubnet] });
+
+    expect(await screen.findByText('fd00:1::/64')).toBeInTheDocument();
+  });
+
+  it('shows dual-stack CIDRs with labels', async () => {
+    const dualStackVN = {
+      ...mockVN,
+      spec: { ipv4Cidr: '10.0.0.0/16', ipv6Cidr: 'fd00::/48' },
+    } as VirtualNetwork;
+
+    renderPage({ virtualNetworks: [dualStackVN] });
+
+    expect(await screen.findByText('IPv4: 10.0.0.0/16')).toBeInTheDocument();
+    expect(screen.getByText('IPv6: fd00::/48')).toBeInTheDocument();
+  });
 });

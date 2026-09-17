@@ -1,7 +1,7 @@
 export interface AttachNatGatewayVirtualNetwork {
   id: string;
   metadata?: { name?: string };
-  spec?: { ipv4Cidr?: string };
+  spec?: { ipv4Cidr?: string; ipv6Cidr?: string };
 }
 
 export interface AttachNatGatewayFormValues {

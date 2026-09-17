@@ -6,6 +6,7 @@ import type {
   AttachNatGatewayFormValues,
   AttachNatGatewayVirtualNetwork,
 } from './AttachNatGatewayWizard.types';
+import { CidrDisplay } from './CidrDisplay';
 import { useTranslation } from '../../hooks/useTranslation';
 import { getErrorMessage } from '../../utils/error';
 import NameField from '../catalogProvision/wizard/fields/NameField';
@@ -74,8 +75,13 @@ const AttachNatGatewayStep = ({
           <FormGroup label={t('Virtual network')} fieldId="attach-nat-gateway-network">
             {virtualNetwork.metadata?.name ?? virtualNetwork.id}
           </FormGroup>
-          <FormGroup label={t('IPv4 CIDR')} fieldId="attach-nat-gateway-cidr">
-            <code>{virtualNetwork.spec?.ipv4Cidr ?? '—'}</code>
+          <FormGroup label={t('CIDR')} fieldId="attach-nat-gateway-cidr">
+            <code>
+              <CidrDisplay
+                ipv4Cidr={virtualNetwork.spec?.ipv4Cidr}
+                ipv6Cidr={virtualNetwork.spec?.ipv6Cidr}
+              />
+            </code>
           </FormGroup>
           <NameField isDisabled={isSubmitting} />
           <SelectField
