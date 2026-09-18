@@ -3,11 +3,14 @@ package bridge
 import (
 	"context"
 	"crypto/tls"
+	"errors"
 	"fmt"
 	"net"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"os"
+	"strings"
 	"time"
 
 	log "github.com/sirupsen/logrus"
@@ -15,6 +18,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/metadata"
 	reflectpb "google.golang.org/grpc/reflection/grpc_reflection_v1"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/reflect/protodesc"
@@ -60,7 +64,18 @@ func NewConnectJSONProxy(grpcURL string, tlsConfig *tls.Config) (http.Handler, e
 	}
 	defer func() { _ = conn.Close() }()
 
-	files, err := discoverServices(conn)
+	// Read the Kubernetes service account token to authenticate the gRPC reflection
+	// call. The fulfillment-service requires authentication for reflection.
+	var bearerToken string
+	tokenBytes, readErr := os.ReadFile("/var/run/secrets/kubernetes.io/serviceaccount/token")
+	if readErr != nil && !errors.Is(readErr, os.ErrNotExist) {
+		return nil, fmt.Errorf("reading service account token: %w", readErr)
+	}
+	if readErr == nil {
+		bearerToken = strings.TrimSpace(string(tokenBytes))
+	}
+
+	files, err := discoverServices(conn, bearerToken)
 	if err != nil {
 		return nil, fmt.Errorf("grpc reflection: %w", err)
 	}
@@ -96,10 +111,13 @@ func NewConnectJSONProxy(grpcURL string, tlsConfig *tls.Config) (http.Handler, e
 	return transcoder, nil
 }
 
-func discoverServices(conn *grpc.ClientConn) (*protoregistry.Files, error) {
+func discoverServices(conn *grpc.ClientConn, bearerToken string) (*protoregistry.Files, error) {
 	client := reflectpb.NewServerReflectionClient(conn)
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
+	if bearerToken != "" {
+		ctx = metadata.AppendToOutgoingContext(ctx, "authorization", "Bearer "+bearerToken)
+	}
 	stream, err := client.ServerReflectionInfo(ctx)
 	if err != nil {
 		return nil, err
