@@ -26,7 +26,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file osac/public/v1/capabilities_service.proto.
  */
 export const file_osac_public_v1_capabilities_service: GenFile = /*@__PURE__*/
-  fileDesc("Cilvc2FjL3B1YmxpYy92MS9jYXBhYmlsaXRpZXNfc2VydmljZS5wcm90bxIOb3NhYy5wdWJsaWMudjEiGAoWQ2FwYWJpbGl0aWVzR2V0UmVxdWVzdCJLChdDYXBhYmlsaXRpZXNHZXRSZXNwb25zZRIwCgVhdXRobhgBIAEoCzIhLm9zYWMucHVibGljLnYxLkF1dGhuQ2FwYWJpbGl0aWVzMpEBCgxDYXBhYmlsaXRpZXMSgAEKA0dldBImLm9zYWMucHVibGljLnYxLkNhcGFiaWxpdGllc0dldFJlcXVlc3QaJy5vc2FjLnB1YmxpYy52MS5DYXBhYmlsaXRpZXNHZXRSZXNwb25zZSIogtPkkwIiEiAvYXBpL2Z1bGZpbGxtZW50L3YxL2NhcGFiaWxpdGllc2IGcHJvdG8z", [file_google_api_annotations, file_osac_public_v1_authn_capabilities_type]);
+  fileDesc("Cilvc2FjL3B1YmxpYy92MS9jYXBhYmlsaXRpZXNfc2VydmljZS5wcm90bxIOb3NhYy5wdWJsaWMudjEiGAoWQ2FwYWJpbGl0aWVzR2V0UmVxdWVzdCJlChdDYXBhYmlsaXRpZXNHZXRSZXNwb25zZRIwCgVhdXRobhgBIAEoCzIhLm9zYWMucHVibGljLnYxLkF1dGhuQ2FwYWJpbGl0aWVzEhgKEGVuYWJsZWRfc2VydmljZXMYAiADKAkykQEKDENhcGFiaWxpdGllcxKAAQoDR2V0EiYub3NhYy5wdWJsaWMudjEuQ2FwYWJpbGl0aWVzR2V0UmVxdWVzdBonLm9zYWMucHVibGljLnYxLkNhcGFiaWxpdGllc0dldFJlc3BvbnNlIiiC0+STAiISIC9hcGkvZnVsZmlsbG1lbnQvdjEvY2FwYWJpbGl0aWVzYgZwcm90bzM", [file_google_api_annotations, file_osac_public_v1_authn_capabilities_type]);
 
 /**
  * Request message for the `Get` method of the `Capabilities` service.
@@ -55,6 +55,13 @@ export type CapabilitiesGetResponse = Message<"osac.public.v1.CapabilitiesGetRes
    * @generated from field: osac.public.v1.AuthnCapabilities authn = 1;
    */
   authn?: AuthnCapabilities | undefined;
+
+  /**
+   * Lowercase names of the services enabled in this deployment.
+   *
+   * @generated from field: repeated string enabled_services = 2;
+   */
+  enabledServices: string[];
 };
 
 /**
